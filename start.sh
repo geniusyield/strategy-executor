@@ -1,14 +1,37 @@
 #!/bin/bash
-echo "======[TRADING STRATEGY]======"
+echo "=====[TRADING STRATEGY EXECUTOR]====="
 echo "Startup checks...."
-# TODO: add
+if [ -z "$BACKEND_URL" ]; then
+    echo "Error: BACKEND_URL environment variable is not set." >&2
+    exit 1 # Exit code 1 for unset variable
+fi
+if [ -z "$SERVER_API_KEY" ]; then
+    echo "Error: SERVER_API_KEY environment variable is not set." >&2
+    exit 1 # Exit code 1 for unset variable
+fi
+if [ -z "$EXECUTION_DELAY" ]; then
+    echo "Error: EXECUTION_DELAY environment variable is not set." >&2
+    exit 1 # Exit code 1 for unset variable
+fi
+if [ -z "$STARTUP_DELAY" ]; then
+    echo "Error: STARTUP_DELAY environment variable is not set." >&2
+    exit 1 # Exit code 1 for unset variable
+fi
+if [ -z "$STRATEGY" ]; then
+    echo "Error: STRATEGY environment variable is not set." >&2
+    exit 1 # Exit code 1 for unset variable
+fi
+if [ -z "$CONFIG" ]; then
+    echo "Error: CONFIG environment variable is not set." >&2
+    exit 1 # Exit code 1 for unset variable
+fi
 echo " [OK] Config is valid"
-echo "===================================="
-echo "Replace placeholders...."
-# TODO: Add
-# export SERVER_CONFIG=$(echo "$SERVER_CONFIG" | sed "s%<<CORE_MAESTRO_API_KEY>>%$CORE_MAESTRO_API_KEY%g")
-echo "[OK] Done. Replaced placeholders."
-echo "===================================="
-echo "Starting active strategy..."
+echo "==============[CONFIG]==============="
+echo " BACKEND_URL     : $BACKEND_URL"
+echo " EXECUTION_DELAY : $EXECUTION_DELAY seconds"
+echo " STARTUP_DELAY   : $STARTUP_DELAY seconds"
+echo " STRATEGY        : $STRATEGY"
+echo "====================================="
+echo "Starting trading strategy executor..."
 set -x
 gunicorn --bind=0.0.0.0:8080 --workers=1 app:app

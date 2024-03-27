@@ -22,18 +22,34 @@ services:
         maestroToken: <<MAESTRO_API_KEY>>
         serverApiKey: <<SERVER_API_KEY>>
     restart: always
-  strategy:
+  strategy_a:
     build:
       context: .
     environment:
       BACKEND_URL: http://server:8082
       SERVER_API_KEY: ${SERVER_API_KEY}
       EXECUTION_DELAY: 15 # Time period in seconds to wait between strategy exeuctions
-      STARTUP_DELAY: 30 # Time period in seconds to wait for the backend to start
+      STARTUP_DELAY: 45 # Time period in seconds to wait for the backend to start
       STRATEGY: strategy_a
       CONFIG: |
         setting_1: 50 ADA
         setting_2: 500 ms
+    ports:
+      - "8080:8080"
+    depends_on:
+      - server
+  strategy_b:
+    build:
+      context: .
+    environment:
+      BACKEND_URL: http://server:8082
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      EXECUTION_DELAY: 15 # Time period in seconds to wait between strategy exeuctions
+      STARTUP_DELAY: 45 # Time period in seconds to wait for the backend to start
+      STRATEGY: strategy_b
+      CONFIG: |
+        setting_1: 123 ADA
+        setting_2: 567 ms
     ports:
       - "8080:8080"
     depends_on:
