@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  server:
+    image: ghcr.io/geniusyield/dex-contracts-api:latest
+    container_name: server
+    ports:
+      - "8082:8082"
+    environment:
+      CORE_MAESTRO_API_KEY: ${CORE_MAESTRO_API_KEY}
+      MAESTRO_API_KEY: ${MAESTRO_API_KEY}
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      SERVER_CONFIG: |
+        coreProvider:
+          maestroToken: <<CORE_MAESTRO_API_KEY>>
+          turboSubmit: false
+        networkId: "mainnet" # supported: mainnet ot preprod
+        logging:
+          - type: {tag: stderr}
+            severity: "Debug" # Options: Debug, Info, Warning or Error
+            verbosity: V2 # Options: `V0`, `V1`, `V2`, `V3` and `V4` (See katip docs for details)
+        port: 8082
+        maestroToken: <<MAESTRO_API_KEY>>
+        serverApiKey: <<SERVER_API_KEY>>
+    restart: always
+  strategy:
+    build:
+      context: .
+    environment:
+      BACKEND_URL: http://server:8082
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      EXECUTION_DELAY: 15 # Time period in seconds to wait between strategy exeuctions
+      STARTUP_DELAY: 30 # Time period in seconds to wait for the backend to start
+      STRATEGY: strategy_a
+      CONFIG: |
+        setting_1: 50 ADA
+        setting_2: 500 ms
+    ports:
+      - "8080:8080"
+    depends_on:
+      - server
