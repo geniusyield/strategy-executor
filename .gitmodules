@@ -1,0 +1,3 @@
+[submodule "dex-contracts-api"]
+	path = dex-contracts-api
+	url = https://github.com/geniusyield/dex-contracts-api.git
