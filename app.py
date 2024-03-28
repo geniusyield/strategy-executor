@@ -12,7 +12,7 @@ from datetime import datetime
 import logging
 
 app = Flask(__name__)
-logger = logging.getLogger('gunicorn.error') 
+logger = logging.getLogger('gunicorn.error')
 
 
 def check_env_variable(var_name):
@@ -26,6 +26,7 @@ BACKEND_URL = check_env_variable('BACKEND_URL')
 STRATEGY = check_env_variable('STRATEGY')
 EXECUTION_DELAY = int(check_env_variable('EXECUTION_DELAY'))
 STARTUP_DELAY = int(check_env_variable('STARTUP_DELAY'))
+RETRY_DELAY = int(check_env_variable('RETRY_DELAY'))
 CONFIG = yaml.safe_load(check_env_variable('CONFIG'))
 
 @app.route('/')
@@ -36,19 +37,19 @@ def health_check():
 
 def load_strategy(strategy_class):
     module = importlib.import_module(f".{strategy_class}", ".strategies")
-    strategy_implementation = getattr(module, strategy_class)
-    return strategy_implementation
+    if hasattr(module, 'init'):
+        module.init()
+    if hasattr(module, 'configure'):
+        module.configure(my_config)
+    strategy_class_ref  = getattr(module, strategy_class)
+    return strategy_class_ref
 
 def worker():
+    logger.info("Worker thread is starting...")
     logger.info(f"Wait {STARTUP_DELAY}s until backend is ready...")
     time.sleep(STARTUP_DELAY)
     logger.info(" [OK] Waiting is over.")
     logger.info("Starting strategy....")
-
-    logger.info("Worker thread is starting...")
-    logger.info(f"Loading strategy {STRATEGY}")
-    strategy = load_strategy(STRATEGY)
-    logger.info(f" [OK] Strategy is loaded.")
 
     # Create API client:
     configuration = swagger_client.Configuration()
@@ -78,10 +79,27 @@ def worker():
     client["trading_fees"] = trading_fees_api
     client["transaction"] = transaction_api
 
-    resp = client["settings"].v0_settings_get()
+    attempt_successful = False
+
+    while not attempt_successful:
+        try:
+            resp = client["settings"].v0_settings_get()
+            attempt_successful = True  # If success, update the flag to exit the loop
+        except Exception as e:
+            # If an exception occurs, print the message and wait for 5 seconds
+            logger.info(f"Backend not available. Wait {RETRY_DELAY} seconds")
+            logger.debug(e)
+            time.sleep(RETRY_DELAY)
+            # The loop will then automatically retry
+
     logger.info(f" > Using version {resp.version} of {resp.backend}.")
     logger.info("==============================================")
     logger.info("[OK] Initialization is done ✅ ")
+
+    logger.info(f"Loading strategy {STRATEGY}")
+    strategy_class_ref = load_strategy(STRATEGY)
+    strategy = strategy_class_ref(client, CONFIG, logger)
+    logger.info(f" [OK] Strategy is loaded.")
 
     while True:
       logger.info("==============================================")
