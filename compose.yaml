@@ -9,11 +9,12 @@ services:
       CORE_MAESTRO_API_KEY: ${CORE_MAESTRO_API_KEY}
       MAESTRO_API_KEY: ${MAESTRO_API_KEY}
       SERVER_API_KEY: ${SERVER_API_KEY}
+      SEED_PHRASE: ${SEED_PHRASE}
       SERVER_CONFIG: |
         coreProvider:
           maestroToken: <<CORE_MAESTRO_API_KEY>>
           turboSubmit: false
-        networkId: "mainnet" # supported: mainnet ot preprod
+        networkId: "preprod" # supported: mainnet ot preprod
         logging:
           - type: {tag: stderr}
             severity: "Debug" # Options: Debug, Info, Warning or Error
@@ -21,6 +22,10 @@ services:
         port: 8082
         maestroToken: <<MAESTRO_API_KEY>>
         serverApiKey: <<SERVER_API_KEY>>
+        wallet:
+          tag: mnemonicWallet
+          contents:
+            mnemonic: <<SEED_PHRASE>>
     restart: always
   strategy_a:
     build:
