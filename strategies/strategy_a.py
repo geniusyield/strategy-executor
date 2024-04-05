@@ -28,3 +28,6 @@ class strategy_a:
         logger.info(f"Version: {api_response.version}")
         logger.info(f"setting_1: {CONFIG['setting_1']}")
         logger.info(f"setting_2: {CONFIG['setting_2']}")
+
+        logger.info(f"Create order")
+        client["orders"].v0_settings_get()

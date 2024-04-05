@@ -31,16 +31,17 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
-#RUN openapi-python-client generate --url https://raw.githubusercontent.com/geniusyield/market-maker/45-bot-api-definition/openapi.yaml
-
-# Switch to the non-privileged user to run the application.
-USER appuser
 
 # Copy the source code into the container.
 COPY . .
 
+RUN ./generate_client.sh
+
 # Expose the port that the application listens on.
 EXPOSE 8080
+
+# Switch to the non-privileged user to run the application.
+USER appuser
 
 # Run the application.
 ENTRYPOINT ["/bin/bash", "./start.sh"]

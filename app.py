@@ -1,6 +1,9 @@
 from flask import Flask, jsonify
-import swagger_client
-from swagger_client.rest import ApiException
+from client import AuthenticatedClient
+from client.models import settings
+from client.models import post_order_parameters
+from client.api.settings import get_settings
+from client.api.orders import post_orders
 import threading
 import time
 import os
@@ -45,6 +48,28 @@ def load_strategy(strategy_class):
     return strategy_class_ref
 
 def worker():
+    # TEST ############################################
+    client = AuthenticatedClient(base_url="http://server:8082/v0/", token=SERVER_API_KEY, auth_header_name="api-key", prefix="")
+    with client as client:
+        response: Response[settings] = get_settings.sync_detailed(client=client)
+        logger.info(f"RESPONSE STATUS CODE: {response.status_code}")
+        logger.info(f"RESPONSE: {response.parsed}")
+        logger.info(response)
+        body: post_order_parameters = post_order_parameters.PostOrderParameters()
+        body.offer_amount="1"
+        body.offer_token="lovelace"
+        body.price_token="66a524d7f34d954a3ad30b4e2d08023c950dfcd53bbe3c2314995da6.744d454c44"
+        body.price_amount="1"
+        body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
+        response: Response[settings] = post_orders.sync_detailed(client=client, body=body)
+        logger.info(f"RESPONSE STATUS CODE: {response.status_code}")
+        logger.info(f"RESPONSE: {response.parsed}")
+        logger.info(response)
+        
+    time.sleep(1000)
+    logger.info(f">>STOPPED <<")
+    # TEST############################################
+
     logger.info("Worker thread is starting...")
     logger.info(f"Wait {STARTUP_DELAY}s until backend is ready...")
     time.sleep(STARTUP_DELAY)

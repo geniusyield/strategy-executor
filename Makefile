@@ -5,7 +5,7 @@ DEFAULT_STRATEGY := strategy_a
 
 start:
 	docker compose up -d --build $(DEFAULT_STRATEGY)
-	docker compose logs -f
+	docker compose logs -f strategy_a
 
 start-a:
 	docker compose up -d --build strategy_a
