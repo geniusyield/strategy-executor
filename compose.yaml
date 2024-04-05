@@ -33,7 +33,7 @@ services:
     environment:
       BACKEND_URL: http://server:8082
       SERVER_API_KEY: ${SERVER_API_KEY}
-      EXECUTION_DELAY: 15 # Time period in seconds to wait between strategy exeuctions
+      EXECUTION_DELAY: 90 # Time period in seconds to wait between strategy exeuctions
       STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
       RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
       STRATEGY: strategy_a

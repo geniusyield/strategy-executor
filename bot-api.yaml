@@ -168,7 +168,8 @@ components:
       type: object
       properties:
         transaction: {type: string, examples: ["hexa"] }
-        transaction_id: {type: string, examples: ["lovelace"]  }
+        transaction_id: {type: string, examples: ["lovelace"] }
+        order_ref: {type: string, examples: ["lovelace"] }
         transaction_fee: {type: string, examples: ["1"]}
         maker_lovelace_flat_fee: {type: string, examples: ["1"]}
         maker_offered_percent_fee: {type: string, examples: ["0.3"]}
@@ -355,7 +356,7 @@ paths:
       responses:
         "200":
           description: Canceled on-chain orders.
-          content: { application/json: { schema: { $ref: '#/components/schemas/SubmitTransactionResponse'}}}
+          content: { application/json: { schema: { $ref: '#/components/schemas/DeleteOrderResponse'}}}
   /historical-trades:
     get:
       parameters:
