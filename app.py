@@ -53,31 +53,44 @@ def worker():
     # TEST ############################################
     client = AuthenticatedClient(base_url="http://server:8082/v0/", token=SERVER_API_KEY, auth_header_name="api-key", prefix="")
     with client as client:
-        response: Response[settings] = get_settings.sync_detailed(client=client)
-        logger.info(f"RESPONSE STATUS CODE: {response.status_code}")
-        logger.info(f"RESPONSE: {response.parsed}")
-        logger.info(response)
+        
+        attempt_successful = False
+        while not attempt_successful:
+            try:
+                response: Response[settings] = get_settings.sync_detailed(client=client)
+                logger.info(f"GET SETTINGS RESPONSE STATUS CODE: {response.status_code}")
+                logger.info(response)
+                attempt_successful = True
+            except Exception as e:
+                # If an exception occurs, print the message and wait for 5 seconds
+                logger.info(f"Backend not available. Wait {RETRY_DELAY} seconds")
+                logger.debug(e)
+                time.sleep(RETRY_DELAY)
+                # The loop will then automatically retry
+        mode="place"
         # Place order:
-        body: post_order_parameters = post_order_parameters.PostOrderParameters()
-        body.offer_amount="1"
-        body.offer_token="lovelace"
-        body.price_token="66a524d7f34d954a3ad30b4e2d08023c950dfcd53bbe3c2314995da6.744d454c44"
-        body.price_amount="1"
-        body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
-        response: Response[settings] = post_orders.sync_detailed(client=client, body=body)
-        logger.info(f"POST RESPONSE STATUS CODE: {response.status_code}")
-        logger.info(f"POST PARSED RESPONSE: {response.parsed}")
-        logger.info(response)
-        # Cancel order:
-        body: delete_order_parameters = delete_order_parameters.DeleteOrderParameters()
-        body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
-        body.order_references=["47276d0ca1d40d818f893d656c503f335f4412439832e525a3c02b161a48627d#0"]
-        response: Response[settings] = delete_orders.sync_detailed(client=client, body=body)
-        logger.info(f"DELETE RESPONSE STATUS CODE: {response.status_code}")
-        logger.info(f"DELETE PARSED RESPONSE: {response.parsed}")
-        logger.info(response)
-        
-        
+        if mode == "place":
+          body: post_order_parameters = post_order_parameters.PostOrderParameters()
+          body.offer_amount="1"
+          body.offer_token="lovelace"
+          body.price_token="66a524d7f34d954a3ad30b4e2d08023c950dfcd53bbe3c2314995da6.744d454c44"
+          body.price_amount="1"
+          body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
+          response: Response[settings] = post_orders.sync_detailed(client=client, body=body)
+          logger.info(f"POST RESPONSE STATUS CODE: {response.status_code}")
+          logger.info(f"POST PARSED RESPONSE: {response.parsed}")
+          logger.info(response)
+        else:
+          # Cancel order:
+          body: delete_order_parameters = delete_order_parameters.DeleteOrderParameters()
+          body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
+          body.order_references=["bab1d0d115bce1afadf789728f5039df0e5edceb05fa78f62a16926c92336cde#0"]
+          response: Response[settings] = delete_orders.sync_detailed(client=client, body=body)
+          logger.info(f"DELETE RESPONSE STATUS CODE: {response.status_code}")
+          logger.info(f"DELETE PARSED RESPONSE: {response.parsed}")
+          logger.info(response)
+    
+    logger.info(f">> FINISHED <<")
     time.sleep(1000)
     logger.info(f">>STOPPED <<")
     # TEST############################################
