@@ -164,6 +164,27 @@ components:
         price_amount: {type: string, examples: ["1"]}
         price_token: { type: string, examples: ["66a524d7f34d954a3ad30b4e2d08023c950dfcd53bbe3c2314995da6.744d454c44"]}   
         address: {type: string, examples: ["addr1v87wwwe4f59dqc50qyt0ckcs0kvh7glpweyal2k5nsgyucgk6038f"]}
+    PostOrderResponse:
+      type: object
+      properties:
+        transaction: {type: string, examples: ["hexa"] }
+        transaction_id: {type: string, examples: ["lovelace"]  }
+        transaction_fee: {type: string, examples: ["1"]}
+        maker_lovelace_flat_fee: {type: string, examples: ["1"]}
+        maker_offered_percent_fee: {type: string, examples: ["0.3"]}
+        maker_offered_percent_fee_amount: {type: string, examples: ["1"]}
+        lovelace_deposit: {type: string, examples: ["1"]}
+    DeleteOrderParameters:
+      type: object
+      properties:
+        address: {type: string, examples: ["addr1v87wwwe4f59dqc50qyt0ckcs0kvh7glpweyal2k5nsgyucgk6038f"]}
+        order_references: {type: array, items: {type: string}, examples: [["addr1v87wwwe4f59dqc50qyt0ckcs0kvh7glpweyal2k5nsgyucgk6038f"]]}
+    DeleteOrderResponse:
+      type: object
+      properties:
+        transaction: {type: string, examples: ["hexa"] }
+        transaction_id: {type: string, examples: ["lovelace"]  }
+        transaction_fee: {type: string, examples: ["1"]}
     BuildTxRequestBase:
       type: object
       properties:
@@ -308,18 +329,6 @@ paths:
         "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
   /orders:
-    get:
-      tags: [orders]
-      description: Fetch existing orders.
-      parameters:
-      - {in: query, name: market_id, required: true, schema: { type: string, examples: ["lovelace_dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53"] }}
-      - {in: query, name: owner, required: false, schema: { type: string, examples: ["addr1v87wwwe4f59dqc50qyt0ckcs0kvh7glpweyal2k5nsgyucgk6038f"] }}
-      - {in: query, name: type, required: false, schema: { type: string, enum: ["buy", "sell"], examples: ["buy"] }}
-      responses:
-        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Orders' }}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
     post:
       tags: [orders]
       description: Create new orders.
@@ -330,24 +339,21 @@ paths:
             schema:
               $ref: '#/components/schemas/PostOrderParameters'
       responses:
-        "201":
-          description: "Succesfully created new on-chain orders."
-          content: {application/json: {schema: {$ref: '#/components/schemas/SubmitTransactionResponse'}}}
+        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/PostOrderResponse' }}}}
         "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /orders/{order_ids}:
     delete:
       tags: [orders]
       description: Cancel existing orders.
-      parameters:
-       - in: path
-         name: order_ids
-         description: Comma-separated list of orders to be cancelled.
-         required: true
-         schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostOrderParameters'
       responses:
-        "202":
+        "200":
           description: Canceled on-chain orders.
           content: { application/json: { schema: { $ref: '#/components/schemas/SubmitTransactionResponse'}}}
         "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}

@@ -2,8 +2,10 @@ from flask import Flask, jsonify
 from client import AuthenticatedClient
 from client.models import settings
 from client.models import post_order_parameters
+from client.models import delete_order_parameters
 from client.api.settings import get_settings
 from client.api.orders import post_orders
+from client.api.orders import delete_orders
 import threading
 import time
 import os
@@ -55,6 +57,7 @@ def worker():
         logger.info(f"RESPONSE STATUS CODE: {response.status_code}")
         logger.info(f"RESPONSE: {response.parsed}")
         logger.info(response)
+        # Place order:
         body: post_order_parameters = post_order_parameters.PostOrderParameters()
         body.offer_amount="1"
         body.offer_token="lovelace"
@@ -62,9 +65,18 @@ def worker():
         body.price_amount="1"
         body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
         response: Response[settings] = post_orders.sync_detailed(client=client, body=body)
-        logger.info(f"RESPONSE STATUS CODE: {response.status_code}")
-        logger.info(f"RESPONSE: {response.parsed}")
+        logger.info(f"POST RESPONSE STATUS CODE: {response.status_code}")
+        logger.info(f"POST PARSED RESPONSE: {response.parsed}")
         logger.info(response)
+        # Cancel order:
+        body: delete_order_parameters = delete_order_parameters.DeleteOrderParameters()
+        body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
+        body.order_references=["47276d0ca1d40d818f893d656c503f335f4412439832e525a3c02b161a48627d#0"]
+        response: Response[settings] = delete_orders.sync_detailed(client=client, body=body)
+        logger.info(f"DELETE RESPONSE STATUS CODE: {response.status_code}")
+        logger.info(f"DELETE PARSED RESPONSE: {response.parsed}")
+        logger.info(response)
+        
         
     time.sleep(1000)
     logger.info(f">>STOPPED <<")
