@@ -7,6 +7,17 @@ class strategy_a:
         self.last_execution_time = None
         self.last_order_ref=None
         logger.info(" > init: strategy_a instance created.")
+        response = api_client.get_settings()
+        logger.info("Settings: ")
+        if response.status_code == 200:
+            settings = response.parsed
+            logger.info(f" > Version: {settings.version}")
+            logger.info(f" > Backend: {settings.backend}")
+            logger.info(f" > Revision: {settings.revision}")
+            logger.info(f" > Address: {settings.address}")
+        else:
+            logger.info(f" [FAILURE] Could not load settings. (HTTP {response.status_code})")
+
 
     def execute(self, api_client, CONFIG, logger):
         current_time = datetime.now()

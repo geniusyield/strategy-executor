@@ -2,7 +2,9 @@ from flask import Flask, jsonify
 from client import AuthenticatedClient
 from client.models import settings
 from client.models import post_order_parameters
+from client.models import post_order_response
 from client.models import delete_order_parameters
+from client.models import delete_order_response
 from client.api.settings import get_settings
 from client.api.orders import post_orders
 from client.api.orders import delete_orders
@@ -23,24 +25,25 @@ class Api:
     def __init__(self, client):
         self.client = client
 
+    def get_settings(self):
+        response: Response[settings] = get_settings.sync_detailed(client=self.client)
+        return response
+    
     def place_order(self, offered_amount, offered_token, price_token, price_amount):
         body: post_order_parameters = post_order_parameters.PostOrderParameters()
         body.offer_amount=offered_amount
         body.offer_token=offered_token
         body.price_token=price_token
         body.price_amount=price_amount
-        response: Response[settings] = post_orders.sync_detailed(client=self.client, body=body)
+        response: Response[post_order_response] = post_orders.sync_detailed(client=self.client, body=body)
         return response
 
     def cancel_order(self, order_reference):
           body: delete_order_parameters = delete_order_parameters.DeleteOrderParameters()
           body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
           body.order_references=[order_reference]
-          response: Response[settings] = delete_orders.sync_detailed(client=self.client, body=body)
+          response: Response[delete_order_response] = delete_orders.sync_detailed(client=self.client, body=body)
           return response
-
-# Other methods can be added as needed
-
 
 def check_env_variable(var_name):
     if var_name not in os.environ:
@@ -72,7 +75,6 @@ def load_strategy(strategy_class):
     return strategy_class_ref
 
 def worker():
-    # TEST ############################################
     client = AuthenticatedClient(base_url="http://server:8082/v0/", token=SERVER_API_KEY, auth_header_name="api-key", prefix="")
     with client as client:
         attempt_successful = False
@@ -88,7 +90,7 @@ def worker():
                 attempt_successful = True
             except Exception as e:
                 # If an exception occurs, print the message and wait for 5 seconds
-                logger.info(f"Backend not available. Wait {RETRY_DELAY} seconds...")
+                logger.info(f" > Backend not available. Wait {RETRY_DELAY} seconds...")
                 logger.debug(e)
                 time.sleep(RETRY_DELAY)
                 # The loop will then automatically retry
@@ -99,7 +101,7 @@ def worker():
     
         logger.info(f"Loading strategy {STRATEGY}")
         strategy_class_ref = load_strategy(STRATEGY)
-        strategy = strategy_class_ref(client, CONFIG, logger)
+        strategy = strategy_class_ref(api_client, CONFIG, logger)
         logger.info(f" [OK] Strategy is loaded.")
     
         while True:
