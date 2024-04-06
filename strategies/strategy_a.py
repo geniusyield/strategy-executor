@@ -50,7 +50,6 @@ class strategy_a:
             settings = response.parsed
             for market in response.parsed:
                 logger.info(f" > Market: {render_cardano_asset_name_with_policy(market.base_asset)} / {render_cardano_asset_name_with_policy(market.target_asset)}")
-                logger.info(f" > {market.target_asset}")
         else:
             logger.info(f" [FAILURE] Could not load markets. (HTTP {response.status_code})")
         
