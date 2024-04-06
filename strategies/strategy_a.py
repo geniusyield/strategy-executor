@@ -1,4 +1,27 @@
 from datetime import datetime
+def render_cardano_asset_name_with_policy(policy_asset_string):
+    if 'lovelace' in policy_asset_string.lower():
+        return "ADA"
+    
+    # Split the input string by the period to separate the policy ID and the asset name
+    parts = policy_asset_string.split('.')
+    if len(parts) != 2:
+        return "Invalid input format. Expected format: <policy_id>.<asset_name>"
+    
+    # Extract the asset name part
+    hex_asset_name = parts[1]
+    
+    try:
+        # Attempt to decode from hexadecimal to bytes, then decode bytes to a UTF-8 string
+        readable_string = bytes.fromhex(hex_asset_name).decode('utf-8')
+    except ValueError:
+        # In case of a ValueError, the input was not valid hexadecimal
+        readable_string = f"Invalid hexadecimal: {hex_asset_name}"
+    except UnicodeDecodeError:
+        # If bytes cannot be decoded to UTF-8, return the original hexadecimal
+        readable_string = f"Non-UTF-8 data: {hex_asset_name}"
+    
+    return readable_string
 
 class strategy_a:
     def __init__(self, api_client, CONFIG, logger):
@@ -8,6 +31,8 @@ class strategy_a:
         self.last_order_ref=None
         logger.info(" > init: strategy_a instance created.")
         response = api_client.get_settings()
+        
+        logger.info("==============================================")
         logger.info("Settings: ")
         if response.status_code == 200:
             settings = response.parsed
@@ -17,6 +42,29 @@ class strategy_a:
             logger.info(f" > Address: {settings.address}")
         else:
             logger.info(f" [FAILURE] Could not load settings. (HTTP {response.status_code})")
+
+        logger.info("==============================================")
+        response = api_client.get_markets()
+        logger.info("Markets: ")
+        if response.status_code == 200:
+            settings = response.parsed
+            for market in response.parsed:
+                logger.info(f" > Market: {render_cardano_asset_name_with_policy(market.base_asset)} / {render_cardano_asset_name_with_policy(market.target_asset)}")
+                logger.info(f" > {market.target_asset}")
+        else:
+            logger.info(f" [FAILURE] Could not load markets. (HTTP {response.status_code})")
+        
+        logger.info("==============================================")
+        tGENS="c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
+        response = api_client.get_asset(tGENS)
+        if response.status_code == 200:
+            tgens_asset = response.parsed
+            logger.info(f" Asset Details - tGENS:")
+            logger.info(f" > Ticker: {tgens_asset.asset_ticker}")
+            logger.info(f" > Decimals: {tgens_asset.asset_decimals}")
+        else:
+            logger.info(f" [FAILURE] Could not load asset details. (HTTP {response.status_code})")
+        
 
 
     def execute(self, api_client, CONFIG, logger):

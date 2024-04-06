@@ -112,9 +112,6 @@ components:
           asset_ticker: "ADA",
           asset_decimals: 6
         }
-    Assets:
-      type: array
-      items: {$ref: '#/components/schemas/Asset'}
     Balance:
       type: object
       properties:
@@ -302,12 +299,19 @@ paths:
         "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "500": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /assets:
+  /assets/{id}:
     get:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the asset to retrieve
+          schema:
+            type: string
       tags: [assets]
       description: Fetch the assets.
       responses:
-        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Assets' }}}}
+        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Asset' }}}}
         "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "500": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}

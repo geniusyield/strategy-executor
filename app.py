@@ -1,11 +1,14 @@
 from flask import Flask, jsonify
 from client import AuthenticatedClient
 from client.models import settings
+from client.models import market
 from client.models import post_order_parameters
 from client.models import post_order_response
 from client.models import delete_order_parameters
 from client.models import delete_order_response
 from client.api.settings import get_settings
+from client.api.markets import get_markets
+from client.api.assets import get_assets_id
 from client.api.orders import post_orders
 from client.api.orders import delete_orders
 import threading
@@ -27,6 +30,14 @@ class Api:
 
     def get_settings(self):
         response: Response[settings] = get_settings.sync_detailed(client=self.client)
+        return response
+
+    def get_markets(self):
+        response: Response[markets] = get_markets.sync_detailed(client=self.client)
+        return response
+
+    def get_asset(self, asset_id):
+        response: Response[asset] = get_assets_id.sync_detailed(client=self.client, id=asset_id)
         return response
     
     def place_order(self, offered_amount, offered_token, price_token, price_amount):
