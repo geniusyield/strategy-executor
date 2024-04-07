@@ -74,7 +74,17 @@ class strategy_a:
             logger.info(f" > Balances: {balances}")
             logger.info(f" > ADA balance: {math.floor(balances['lovelace'] / 1_000_000)} ₳")
         else:
-            logger.info(f" [FAILURE] Could not load asset details. (HTTP {response.status_code})")
+            logger.info(f" [FAILURE] Could not load balances. (HTTP {response.status_code})")
+            
+        logger.info("==============================================")
+        response = api_client.get_trading_fees()
+        if response.status_code == 200:
+            fees = response.parsed
+            logger.info(f" Trading Fees:")
+            logger.info(f" > Maker Fee: {int(fees.flat_maker_fee) / 1_000_000 } ₳ + {fees.percentage_maker_fee}%")
+            logger.info(f" > Taker Fee: {int(fees.flat_taker_fee) / 1_000_000} ₳ + {fees.percentage_taker_fee}%")
+        else:
+            logger.info(f" [FAILURE] Could not load trading fees. (HTTP {response.status_code})")
         
 
 

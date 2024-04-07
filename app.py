@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from client import AuthenticatedClient
 from client.models import settings
+from client.models import fees
 from client.models import market
 from client.models import post_order_parameters
 from client.models import post_order_response
@@ -8,6 +9,7 @@ from client.models import delete_order_parameters
 from client.models import delete_order_response
 from client.api.settings import get_settings
 from client.api.markets import get_markets
+from client.api.fees import get_trading_fees
 from client.api.balances import get_balances_address
 from client.api.assets import get_assets_id
 from client.api.orders import post_orders
@@ -47,6 +49,10 @@ class Api:
 
     def get_balances(self):
         response: Response[balances] = get_balances_address.sync_detailed(client=self.client, address=self.own_address)
+        return response
+
+    def get_trading_fees(self):
+        response: Response[fees] = get_trading_fees.sync_detailed(client=self.client)
         return response
     
     def place_order(self, offered_amount, offered_token, price_token, price_amount):
