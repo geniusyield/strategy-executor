@@ -112,20 +112,12 @@ components:
           asset_ticker: "ADA",
           asset_decimals: 6
         }
-    Balance:
-      type: object
-      properties:
-        asset: { type: string, description: "Identifier of the asset", examples: ["lovelace", "dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53"]}
-        amount: { type: string, format: integer, description: "Amount of asset available in indivisible units.", examples: ["123456789123456789123456789"] }
-      required: [asset, amount]
+    Balances:
       examples:
       - {
-          asset: "dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53",
-          amount: "4531034100"
+          lovalace: "1",
+          dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53: "2"
         }
-    Balances:
-      type: array
-      items: {$ref: '#/components/schemas/Balance'}
     Order:
       properties:
         base_asset: {type: string, description: "The base cryptoasset", examples: ["lovelace"] }
@@ -324,10 +316,16 @@ paths:
         "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "500": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /balances:
+  /balances/{address}:
     get:
       tags: [balances]
       description: Get available trading bot balances.
+      parameters:
+      - name: address
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Balances' }}}}
         "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}

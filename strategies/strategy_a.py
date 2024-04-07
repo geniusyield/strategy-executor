@@ -64,6 +64,15 @@ class strategy_a:
         else:
             logger.info(f" [FAILURE] Could not load asset details. (HTTP {response.status_code})")
         
+        logger.info("==============================================")
+        response = api_client.get_balances()
+        if response.status_code == 200:
+            balances = response.parsed
+            logger.info(f" Balances:")
+            logger.info(f" > Balances: {balances}")
+        else:
+            logger.info(f" [FAILURE] Could not load asset details. (HTTP {response.status_code})")
+        
 
 
     def execute(self, api_client, CONFIG, logger):

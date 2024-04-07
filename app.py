@@ -8,6 +8,7 @@ from client.models import delete_order_parameters
 from client.models import delete_order_response
 from client.api.settings import get_settings
 from client.api.markets import get_markets
+from client.api.balances import get_balances_address
 from client.api.assets import get_assets_id
 from client.api.orders import post_orders
 from client.api.orders import delete_orders
@@ -25,8 +26,12 @@ app = Flask(__name__)
 logger = logging.getLogger('gunicorn.error')
 
 class Api:
-    def __init__(self, client):
+
+    own_address = None
+
+    def __init__(self, client, own_address):
         self.client = client
+        self.own_address = own_address
 
     def get_settings(self):
         response: Response[settings] = get_settings.sync_detailed(client=self.client)
@@ -38,6 +43,10 @@ class Api:
 
     def get_asset(self, asset_id):
         response: Response[asset] = get_assets_id.sync_detailed(client=self.client, id=asset_id)
+        return response
+
+    def get_balances(self):
+        response: Response[balances] = get_balances_address.sync_detailed(client=self.client, address=self.own_address)
         return response
     
     def place_order(self, offered_amount, offered_token, price_token, price_amount):
@@ -89,6 +98,7 @@ def worker():
     client = AuthenticatedClient(base_url="http://server:8082/v0/", token=SERVER_API_KEY, auth_header_name="api-key", prefix="")
     with client as client:
         attempt_successful = False
+        own_address = None
         logger.info(f" Connecting to backend at: {BACKEND_URL}...")
         while not attempt_successful:
             try:
@@ -98,15 +108,16 @@ def worker():
                 logger.info(f" > Backend: {response.parsed.backend}")
                 logger.info(f" > Revision: {response.parsed.revision}")
                 logger.info(f" > Address: {response.parsed.address}")
+                own_address = response.parsed.address
                 attempt_successful = True
             except Exception as e:
                 # If an exception occurs, print the message and wait for 5 seconds
-                logger.info(f" > Backend not available. Wait {RETRY_DELAY} seconds...")
+                logger.info(f" > Backend not available. Retry in {RETRY_DELAY} seconds...")
                 logger.debug(e)
                 time.sleep(RETRY_DELAY)
                 # The loop will then automatically retry
 
-        api_client = Api(client);
+        api_client = Api(client, own_address);
         logger.info("==============================================")
         logger.info("[OK] Initialization is done ✅ ")
     
