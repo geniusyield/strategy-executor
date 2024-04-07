@@ -1,4 +1,6 @@
 from datetime import datetime
+import math
+
 def render_cardano_asset_name_with_policy(policy_asset_string):
     if 'lovelace' in policy_asset_string.lower():
         return "ADA"
@@ -70,6 +72,7 @@ class strategy_a:
             balances = response.parsed
             logger.info(f" Balances:")
             logger.info(f" > Balances: {balances}")
+            logger.info(f" > ADA balance: {math.floor(balances['lovelace'] / 1_000_000)} ₳")
         else:
             logger.info(f" [FAILURE] Could not load asset details. (HTTP {response.status_code})")
         
