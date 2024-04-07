@@ -82,7 +82,7 @@ class strategy_a:
             fees = response.parsed
             logger.info(f" Trading Fees:")
             logger.info(f" > Maker Fee: {int(fees.flat_maker_fee) / 1_000_000 } ₳ + {fees.percentage_maker_fee}%")
-            logger.info(f" > Taker Fee: {int(fees.flat_taker_fee) / 1_000_000} ₳ + {fees.percentage_taker_fee}%")
+            logger.info(f" > Taker Fee: {int(fees.flat_taker_fee) / 1_000_000 } ₳ + {fees.percentage_taker_fee}%")
         else:
             logger.info(f" [FAILURE] Could not load trading fees. (HTTP {response.status_code})")
         
