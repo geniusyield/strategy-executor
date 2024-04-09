@@ -296,8 +296,6 @@ components:
       - asks
     MarketOHLC:
       type: object
-      description: Returns market activity in candlestick OHLC format for a specific
-        DEX and token pair
       example:
         base_close: 0.207742
         base_high: 0.207742
@@ -525,7 +523,7 @@ paths:
       produces:
       - application/json;charset=utf-8
       responses:
-        "200": {description: Success, content: {application/json: {schema: {items: {$ref: '#/components/schemas/MarketOHLC'} }}}}
+        "200": {description: Success, content: {application/json: {schema: {type: array, items: {$ref: '#/components/schemas/MarketOHLC'} }}}}
         '400':
           description: Invalid `sort` or `limit` or `to` or `from` or `resolution`
             or `dex` or `market-id`

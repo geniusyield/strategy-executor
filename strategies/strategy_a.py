@@ -56,6 +56,7 @@ class strategy_a:
             settings = response.parsed
             for market in response.parsed:
                 logger.info(f" > Market: {render_cardano_asset_name_with_policy(market.base_asset)} / {render_cardano_asset_name_with_policy(market.target_asset)}")
+                logger.info(f" > {market.market_id}")
         else:
             logger.info(f" [FAILURE] Could not load markets. (HTTP {response.status_code})")
         
@@ -80,7 +81,7 @@ class strategy_a:
             balances = response.parsed
             logger.info(f" Balances:")
             logger.info(f" > Balances: {balances}")
-            logger.info(f" > ADA balance: {math.floor(balances['lovelace'] / 1_000_000)} ₳")
+            logger.info(f" > ADA balance: {math.floor(balances.get('lovelace', 0) / 1_000_000)} ₳")
         else:
             logger.info(f" [FAILURE] Could not load balances. (HTTP {response.status_code})")
             
@@ -132,10 +133,12 @@ class strategy_a:
         logger.info("==============================================")
         logger.info("              GENS PRICE HISTORY              ")
         logger.info("==============================================")
-        market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
-        response = api_client.get_price_history(gens_ada_market_id, "1d", "2024-01-01", "2024-03-31")
+        tgens_market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
+        gens_market_id="lovelace_dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53"
+        response = api_client.get_price_history(gens_market_id, "1h", "2024-01-01", "2024-01-02")
         if response.status_code == 200:
-            logger.info(f" > {response}")
+            for candle in response.parsed:
+                logger.info(f" > Closing price: {candle.base_close}")
         else:
             logger.info(f" [FAILURE] Could not load ADA/GENS price history. (HTTP {response.status_code})")
 

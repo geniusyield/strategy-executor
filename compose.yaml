@@ -14,7 +14,7 @@ services:
         coreProvider:
           maestroToken: <<CORE_MAESTRO_API_KEY>>
           turboSubmit: false
-        networkId: "preprod" # supported: mainnet ot preprod
+        networkId: "mainnet" # supported: mainnet ot preprod
         logging:
           - type: {tag: stderr}
             severity: "Debug" # Options: Debug, Info, Warning or Error
