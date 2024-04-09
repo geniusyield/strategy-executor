@@ -135,7 +135,7 @@ class strategy_a:
         logger.info("==============================================")
         tgens_market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
         gens_market_id="lovelace_dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53"
-        response = api_client.get_price_history(gens_market_id, "1h", "2024-01-01", "2024-01-02")
+        response = api_client.get_price_history(tgens_market_id, "1h", "2024-01-01", "2024-01-02")
         if response.status_code == 200:
             for candle in response.parsed:
                 logger.info(f" > Closing price: {candle.base_close}")
