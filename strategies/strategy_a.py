@@ -85,7 +85,38 @@ class strategy_a:
             logger.info(f" > Taker Fee: {int(fees.flat_taker_fee) / 1_000_000 } ₳ + {fees.percentage_taker_fee}%")
         else:
             logger.info(f" [FAILURE] Could not load trading fees. (HTTP {response.status_code})")
+            
+        logger.info("==============================================")
+        gens_ada_market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
+        response = api_client.get_order_book(gens_ada_market_id)
+        if response.status_code == 200:
+            order_book_response = response
+            logger.info(f" ADA/GENS Order Book:")
+            
+            logger.info(f" > ASKS:")
+            for order in response.parsed.asks:
+                logger.info(f" > ask > Amount: {order.offer_amount}, Price: {order.price}")
+
+            logger.info(f" > BIDS:")
+            for order in response.parsed.bids:
+                logger.info(f" > bid > Amount: {order.offer_amount}, Price: {order.price}")
+        else:
+            logger.info(f" [FAILURE] Could not load ADA/GENS Order Book. (HTTP {response.status_code})")
         
+        logger.info("==============================================")
+        market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
+        response = api_client.get_own_orders(gens_ada_market_id)
+        if response.status_code == 200:
+            order_book_response = response
+            logger.info(f" Own orders:")
+            
+            for order in response.parsed.asks:
+                logger.info(f" > ask > Amount: {order.offer_amount}, Price: {order.price}")
+
+            for order in response.parsed.bids:
+                logger.info(f" > bid > Amount: {order.offer_amount}, Price: {order.price}")
+        else:
+            logger.info(f" [FAILURE] Could not load ADA/GENS Order Book. (HTTP {response.status_code})")
 
 
     def execute(self, api_client, CONFIG, logger):
@@ -110,7 +141,7 @@ class strategy_a:
             response = api_client.place_order(
                          offered_amount="1",
                          offered_token="lovelace",
-                         price_token="66a524d7f34d954a3ad30b4e2d08023c950dfcd53bbe3c2314995da6.744d454c44",
+                         price_token="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53",
                          price_amount="1"
             )
             logger.info(f" > RESPONSE STATUS CODE: {response.status_code}")

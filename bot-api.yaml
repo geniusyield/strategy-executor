@@ -262,6 +262,39 @@ components:
     Prices:
       type: array
       items: {$ref: '#/components/schemas/Price'}
+    OrderInfo:
+      type: object
+      properties:
+        offer_amount: { type: string }
+        output_reference: { type: string }
+        owner_address: { type: string }
+        owner_key_hash: { type: string }
+        price: { type: string }
+        start: { type: string, format: ISO8601}
+        end: { type: string, format: ISO8601}
+      required:
+      - offer_amount
+      - price
+      - owner_address
+      - owner_key_hash
+      - output_reference
+    OrderBookInfo:
+      type: object
+      properties:
+        market_pair_id: {type: string}
+        timestamp: {type: string }
+        asks:
+          type: array
+          items: { $ref: '#/components/schemas/OrderInfo' }
+        bids:
+          type: array
+          items: { $ref: '#/components/schemas/OrderInfo' }
+      required:
+      - market_pair_id
+      - timestamp
+      - bids
+      - asks
+
 security:
   - ApiKeyAuth: [read, write]
 tags:
@@ -359,6 +392,35 @@ paths:
         "200":
           description: Canceled on-chain orders.
           content: { application/json: { schema: { $ref: '#/components/schemas/DeleteOrderResponse'}}}
+  /order-books/{market_id}:
+    get:
+      tags: [orders]
+      parameters:
+        - name: market_id
+          in: path
+          required: true
+          description: The ID of the market to retrieve the orderbook for.
+          schema: {type: string}
+        - in: query
+          name: "address"
+          schema: {type: string}
+          required: false
+      description: Get order book for a specific market.
+      produces:
+      - application/json;charset=utf-8
+      responses:
+        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/OrderBookInfo' }}}}
+        '400':
+          description: Invalid `address` or `market-id`
+        '401':
+          description: Unauthorized access - API key missing
+        '403':
+          description: Forbidden - The API key does not have permission to perform
+            the request
+        '500':
+          description: Internal server error
+
+
   /historical-trades:
     get:
       parameters:
