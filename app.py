@@ -3,6 +3,7 @@ from client import AuthenticatedClient
 from client.models import settings
 from client.models import fees
 from client.models import market
+from client.models import market_ohlc
 from client.models import post_order_parameters
 from client.models import post_order_response
 from client.models import post_order_response
@@ -17,6 +18,7 @@ from client.api.assets import get_assets_id
 from client.api.orders import post_orders
 from client.api.orders import delete_orders
 from client.api.orders import get_order_books_market_id
+from client.api.historical_prices import get_historical_prices_maestro_market_dex
 import threading
 import time
 import os
@@ -64,6 +66,10 @@ class Api:
 
     def get_own_orders(self, market_id):
         response: Response[order_book_info] = get_order_books_market_id.sync_detailed(client=self.client, market_id=market_id, address=self.own_address)
+        return response
+
+    def get_price_history(self, market_id, resolution, from_date, until_date):
+        response: Response[order_book_info] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="minswap", resolution=resolution, from_=from_date, to=until_date)
         return response
     
     def place_order(self, offered_amount, offered_token, price_token, price_amount):

@@ -294,6 +294,76 @@ components:
       - timestamp
       - bids
       - asks
+    MarketOHLC:
+      type: object
+      description: Returns market activity in candlestick OHLC format for a specific
+        DEX and token pair
+      example:
+        base_close: 0.207742
+        base_high: 0.207742
+        base_low: 0.207742
+        base_open: 0.207742
+        base_volume: 25.21128
+        count: 1
+        target_close: 4.813658
+        target_high: 4.813658
+        target_low: 4.813658
+        target_open: 4.813658
+        target_volume: 121.358488
+        timestamp: 2024-03-07T23:45:00Z
+      properties:
+        base_close:
+          format: double
+          type: number
+        base_high:
+          format: double
+          type: number
+        base_low:
+          format: double
+          type: number
+        base_open:
+          format: double
+          type: number
+        base_volume:
+          format: double
+          type: number
+        count:
+          exclusiveMinimum: false
+          minimum: 0
+          type: integer
+        target_close:
+          format: double
+          type: number
+        target_high:
+          format: double
+          type: number
+        target_low:
+          format: double
+          type: number
+        target_open:
+          format: double
+          type: number
+        target_volume:
+          format: double
+          type: number
+        timestamp:
+          description: This is the posix time in ISO8601 format.
+          example: 1970-01-01T00:00:00Z
+          format: ISO8601
+          type: string
+      required:
+      - base_close
+      - base_high
+      - base_low
+      - base_open
+      - base_volume
+      - target_close
+      - target_high
+      - target_low
+      - target_open
+      - target_volume
+      - count
+      - timestamp
 
 security:
   - ApiKeyAuth: [read, write]
@@ -419,134 +489,64 @@ paths:
             the request
         '500':
           description: Internal server error
-
-
-  /historical-trades:
+  /historical-prices/maestro/{market}/{dex}:
     get:
+      description: This endpoint internally calls Maestro's "DEX And Pair OHLC" endpoint.
       parameters:
-      - {in: query, name: market_id, required: true, schema: { type: string }}
-      - {in: query, name: type, required: false, schema: { type: string, enum: ["buy", "sell"], examples: ["buy"] }}
-      - {in: query, name: limit, required: false, schema: { type: integer, examples: ["100"] }}
-      - {in: query, name: page, required: false, schema: { type: integer, examples: ["1"] }}
-      - {in: query, name: start_time, required: false, schema: { type: string, format: "date-time", examples: ["1985-04-12T23:00:00.00Z"] }}
-      - {in: query, name: end_time, required: false, schema: { type: string, format: "date-time", examples: ["1985-04-12T23:00:00.00Z"] }}
-      tags: [trades]
-      description: Fetch historical trades.
+      - in: path
+        name: market
+        required: true
+        schema: {type: string}
+      - name: dex
+        in: path
+        required: true
+        schema: {type: string}
+      - name: resolution
+        in: query
+        required: false
+        schema: {type: string}
+      - name: from
+        format: date
+        in: query
+        required: false
+        schema: {type: string}
+      - name: to
+        in: query
+        schema: {type: string}
+        required: false
+      - name: limit
+        in: query
+        required: false
+        schema: {type: number}
+      - name: sort
+        in: query
+        required: false
+        schema: {type: string}
+      produces:
+      - application/json;charset=utf-8
       responses:
-        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Trades' }}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /historical-prices/maestro:
-    get:
-      tags: [prices]
-      parameters:
-      - {in: path, name: provider, required: true, default: "maestro", schema: { type: string }}
-      - {in: query, name: market_id, required: true, schema: { type: string }}
-      - {in: query, name: resolution, required: false, schema: { type: string, enum: ["1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w", "1mo"], examples: ["30m"] }}
-      - {in: query, name: from, required: false, schema: { type: string, format: "date-time", examples: ["1985-04-12T23:00:00.00Z"] }}
-      - {in: query, name: to, required: false, schema: { type: string, format: "date-time", examples: ["1985-04-12T23:00:00.00Z"] }}
-      - {in: query, name: limit, required: false, schema: { type: integer, examples: ["100"] }}
-      - {in: query, name: sort, required: false, schema: { type: string, enum: ["asc", "desc"] }}
-      description: Fetch price history.
-      responses:
-        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Prices' }}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /historical-prices/taptools:
-    get:
-      tags: [prices]
-      parameters:
-      - {in: path, name: provider, required: true, default: "maestro", schema: { type: string }}
-      - {in: query, name: market_id, required: true, schema: { type: string }}
-      - {in: query, name: resolution, required: false, schema: { type: string, enum: ["1m", "5m", "15m", "30m", "1h", "4h", "1d", "1w", "1mo"], examples: ["30m"] }}
-      - {in: query, name: from, required: false, schema: { type: string, format: "date-time", examples: ["1985-04-12T23:00:00.00Z"] }}
-      - {in: query, name: to, required: false, schema: { type: string, format: "date-time", examples: ["1985-04-12T23:00:00.00Z"] }}
-      - {in: query, name: limit, required: false, schema: { type: integer, examples: ["100"] }}
-      - {in: query, name: sort, required: false, schema: { type: string, enum: ["asc", "desc"] }}
-      description: Fetch price history.
-      responses:
-        "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Prices' }}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
+        "200": {description: Success, content: {application/json: {schema: {items: {$ref: '#/components/schemas/MarketOHLC'} }}}}
+        '400':
+          description: Invalid `sort` or `limit` or `to` or `from` or `resolution`
+            or `dex` or `market-id`
+        '401':
+          description: Unauthorized access - API key missing
+        '403':
+          description: Forbidden - The API key does not have permission to perform
+            the request
+        '500':
+          description: Internal server error
+      security:
+      - api-key: []
+      summary: Get price history using Maestro.
+      tags:
+      - Historical Prices
   /trading-fees:
     get:
       tags: [fees]
       description: Fetch the current trading fees.
       responses:
         "200": {description: Success, content: {application/json: {schema: {$ref: '#/components/schemas/Fees' }}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /tx/build-place-order-tx:
-    post:
-      tags: [tx]
-      description: Build a transaction to place an order.
-      requestBody:
-        required: true
-        content: {application/json: {schema: {$ref: '#/components/schemas/BuildPlaceOrdersTxRequest'}}}
-      responses:
-        "201":
-          description: "Created unsigned transactions to place new orders"
-          content: {application/json: {schema: {$ref: '#/components/schemas/Transaction'}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /tx/build-cancel-order-tx:
-    post:
-      description: Build a transaction to cancel an order.
-      tags: [tx]
-      requestBody:
-        required: true
-        content: {application/json: {schema: {$ref: '#/components/schemas/BuildCancelOrdersTxRequest'}}}
-      responses:
-        "201":
-          description: "Created unsigned transactions to cancel new orders"
-          content: {application/json: {schema: {$ref: '#/components/schemas/Transaction'}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /tx/sign:
-    post:
-      tags: [tx]
-      description: Sign a transaction.
-      requestBody:
-        required: true
-        content: {application/json: {schema: {$ref: '#/components/schemas/Transaction'}}}
-      responses:
-        "201":
-          description: "Created unsigned transactions to cancel existing orders"
-          content: {application/json: {schema: {$ref: '#/components/schemas/Transaction'}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /tx/submit:
-    post:
-      tags: [tx]
-      description: Submit a signed transaction.
-      requestBody:
-        required: true
-        content: {application/json: {schema: {$ref: '#/components/schemas/Transaction'}}}
-      responses:
-        "201":
-          description: "Submitted the passed signed transactions and created new on-chain orders."
-          content: {application/json: {schema: {$ref: '#/components/schemas/SubmitTransactionResponse'}}}
-        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
-  /tx/sign-and-submit:
-    post:
-      tags: [tx]
-      description: Sign and submit a transaction.
-      requestBody:
-        required: true
-        content: {application/json: {schema: {$ref: '#/components/schemas/Transaction'}}}
-      responses:
-        "201":
-          description: "Submitted the passed signed transactions and created new on-chain orders."
-          content: {application/json: {schema: {$ref: '#/components/schemas/SubmitTransactionResponse'}}}
         "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
         "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}

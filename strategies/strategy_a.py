@@ -35,6 +35,8 @@ class strategy_a:
         response = api_client.get_settings()
         
         logger.info("==============================================")
+        logger.info("                   SETTINGS                   ")
+        logger.info("==============================================")
         logger.info("Settings: ")
         if response.status_code == 200:
             settings = response.parsed
@@ -46,6 +48,8 @@ class strategy_a:
             logger.info(f" [FAILURE] Could not load settings. (HTTP {response.status_code})")
 
         logger.info("==============================================")
+        logger.info("                     MARKETS                  ")
+        logger.info("==============================================")
         response = api_client.get_markets()
         logger.info("Markets: ")
         if response.status_code == 200:
@@ -55,6 +59,8 @@ class strategy_a:
         else:
             logger.info(f" [FAILURE] Could not load markets. (HTTP {response.status_code})")
         
+        logger.info("==============================================")
+        logger.info("             tGENS ASSET DETAILS              ")
         logger.info("==============================================")
         tGENS="c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
         response = api_client.get_asset(tGENS)
@@ -67,6 +73,8 @@ class strategy_a:
             logger.info(f" [FAILURE] Could not load asset details. (HTTP {response.status_code})")
         
         logger.info("==============================================")
+        logger.info("                 WALLET BALANCE               ")
+        logger.info("==============================================")
         response = api_client.get_balances()
         if response.status_code == 200:
             balances = response.parsed
@@ -76,6 +84,8 @@ class strategy_a:
         else:
             logger.info(f" [FAILURE] Could not load balances. (HTTP {response.status_code})")
             
+        logger.info("==============================================")
+        logger.info("               GENS/ADA ORDERBOOK             ")
         logger.info("==============================================")
         response = api_client.get_trading_fees()
         if response.status_code == 200:
@@ -104,6 +114,8 @@ class strategy_a:
             logger.info(f" [FAILURE] Could not load ADA/GENS Order Book. (HTTP {response.status_code})")
         
         logger.info("==============================================")
+        logger.info("                 OWN ORDERS                   ")
+        logger.info("==============================================")
         market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
         response = api_client.get_own_orders(gens_ada_market_id)
         if response.status_code == 200:
@@ -116,7 +128,16 @@ class strategy_a:
             for order in response.parsed.bids:
                 logger.info(f" > bid > Amount: {order.offer_amount}, Price: {order.price}")
         else:
-            logger.info(f" [FAILURE] Could not load ADA/GENS Order Book. (HTTP {response.status_code})")
+            logger.info(f" [FAILURE] Could not load ADA/GENS orders. (HTTP {response.status_code})")
+        logger.info("==============================================")
+        logger.info("              GENS PRICE HISTORY              ")
+        logger.info("==============================================")
+        market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
+        response = api_client.get_price_history(gens_ada_market_id, "1d", "2024-01-01", "2024-03-31")
+        if response.status_code == 200:
+            logger.info(f" > {response}")
+        else:
+            logger.info(f" [FAILURE] Could not load ADA/GENS price history. (HTTP {response.status_code})")
 
 
     def execute(self, api_client, CONFIG, logger):
