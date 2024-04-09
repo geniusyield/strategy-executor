@@ -1,24 +1,7 @@
-from flask import Flask, jsonify
 from client import AuthenticatedClient
 from client.models import settings
-from client.models import fees
-from client.models import market
-from client.models import market_ohlc
-from client.models import post_order_parameters
-from client.models import post_order_response
-from client.models import post_order_response
-from client.models import delete_order_parameters
-from client.models import order_book_info
-from client.models import order_info
 from client.api.settings import get_settings
-from client.api.markets import get_markets
-from client.api.fees import get_trading_fees
-from client.api.balances import get_balances_address
-from client.api.assets import get_assets_id
-from client.api.orders import post_orders
-from client.api.orders import delete_orders
-from client.api.orders import get_order_books_market_id
-from client.api.historical_prices import get_historical_prices_maestro_market_dex
+from flask import Flask, jsonify
 import threading
 import time
 import os
@@ -26,67 +9,13 @@ import sys
 import importlib
 import yaml
 import time
+from api import Api
+from api import ApiException
 from datetime import datetime
 import logging
 
 app = Flask(__name__)
 logger = logging.getLogger('gunicorn.error')
-
-class Api:
-
-    own_address = None
-
-    def __init__(self, client, own_address):
-        self.client = client
-        self.own_address = own_address
-
-    def get_settings(self):
-        response: Response[settings] = get_settings.sync_detailed(client=self.client)
-        return response
-
-    def get_markets(self):
-        response: Response[markets] = get_markets.sync_detailed(client=self.client)
-        return response
-
-    def get_asset(self, asset_id):
-        response: Response[asset] = get_assets_id.sync_detailed(client=self.client, id=asset_id)
-        return response
-
-    def get_balances(self):
-        response: Response[balances] = get_balances_address.sync_detailed(client=self.client, address=self.own_address)
-        return response
-
-    def get_trading_fees(self):
-        response: Response[fees] = get_trading_fees.sync_detailed(client=self.client)
-        return response
-
-    def get_order_book(self, market_id):
-        response: Response[order_book_info] = get_order_books_market_id.sync_detailed(client=self.client, market_id=market_id)
-        return response
-
-    def get_own_orders(self, market_id):
-        response: Response[order_book_info] = get_order_books_market_id.sync_detailed(client=self.client, market_id=market_id, address=self.own_address)
-        return response
-
-    def get_price_history(self, market_id, resolution, from_date, until_date):
-        response: Response[order_book_info] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="minswap", resolution=resolution, from_=from_date, to=until_date)
-        return response
-    
-    def place_order(self, offered_amount, offered_token, price_token, price_amount):
-        body: post_order_parameters = post_order_parameters.PostOrderParameters()
-        body.offer_amount=offered_amount
-        body.offer_token=offered_token
-        body.price_token=price_token
-        body.price_amount=price_amount
-        response: Response[post_order_response] = post_orders.sync_detailed(client=self.client, body=body)
-        return response
-
-    def cancel_order(self, order_reference):
-          body: delete_order_parameters = delete_order_parameters.DeleteOrderParameters()
-          body.address="addr_test1qz9zh342r6ynfhk974tmjxxxznrmmh0tre09tdh6gc3r6r2rq3uxt0yu4c0mg2ck6h8f0h3ykh7n4w68f7dr3mfch58q6rhtxg"
-          body.order_references=[order_reference]
-          response: Response[delete_order_response] = delete_orders.sync_detailed(client=self.client, body=body)
-          return response
 
 def check_env_variable(var_name):
     if var_name not in os.environ:
@@ -140,7 +69,7 @@ def worker():
                 time.sleep(RETRY_DELAY)
                 # The loop will then automatically retry
 
-        api_client = Api(client, own_address);
+        api_client = Api(client, own_address)
         logger.info("==============================================")
         logger.info("[OK] Initialization is done ✅ ")
     
@@ -151,7 +80,7 @@ def worker():
     
         while True:
           logger.info("==============================================")
-          logger.info(f" > Invoking strategy ({STRATEGY})... ⚙️⏳ ")
+          logger.info(f" > Invoking strategy: {STRATEGY}... ⚙️⏳ ")
           start_time = time.time()
           logger.info(f"Start time: {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')}")
           try:

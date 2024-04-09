@@ -1,5 +1,6 @@
 from datetime import datetime
 import math
+from api import ApiException
 
 def render_cardano_asset_name_with_policy(policy_asset_string):
     if 'lovelace' in policy_asset_string.lower():
@@ -32,116 +33,111 @@ class strategy_a:
         self.last_execution_time = None
         self.last_order_ref=None
         logger.info(" > init: strategy_a instance created.")
-        response = api_client.get_settings()
         
         logger.info("==============================================")
         logger.info("                   SETTINGS                   ")
         logger.info("==============================================")
         logger.info("Settings: ")
-        if response.status_code == 200:
-            settings = response.parsed
+        try:
+            settings = api_client.get_settings()
             logger.info(f" > Version: {settings.version}")
             logger.info(f" > Backend: {settings.backend}")
             logger.info(f" > Revision: {settings.revision}")
             logger.info(f" > Address: {settings.address}")
-        else:
-            logger.info(f" [FAILURE] Could not load settings. (HTTP {response.status_code})")
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
 
         logger.info("==============================================")
         logger.info("                     MARKETS                  ")
         logger.info("==============================================")
-        response = api_client.get_markets()
         logger.info("Markets: ")
-        if response.status_code == 200:
-            settings = response.parsed
-            for market in response.parsed:
+        try:
+            markets = api_client.get_markets()
+            for market in markets:
                 logger.info(f" > Market: {render_cardano_asset_name_with_policy(market.base_asset)} / {render_cardano_asset_name_with_policy(market.target_asset)}")
                 logger.info(f" > {market.market_id}")
-        else:
-            logger.info(f" [FAILURE] Could not load markets. (HTTP {response.status_code})")
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
         
         logger.info("==============================================")
         logger.info("             tGENS ASSET DETAILS              ")
         logger.info("==============================================")
         tGENS="c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
-        response = api_client.get_asset(tGENS)
-        if response.status_code == 200:
-            tgens_asset = response.parsed
+        try:
+            tgens_asset = api_client.get_asset(tGENS)
             logger.info(f" Asset Details - tGENS:")
             logger.info(f" > Ticker: {tgens_asset.asset_ticker}")
             logger.info(f" > Decimals: {tgens_asset.asset_decimals}")
-        else:
-            logger.info(f" [FAILURE] Could not load asset details. (HTTP {response.status_code})")
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
         
         logger.info("==============================================")
         logger.info("                 WALLET BALANCE               ")
         logger.info("==============================================")
-        response = api_client.get_balances()
-        if response.status_code == 200:
-            balances = response.parsed
+        try:
+            balances = api_client.get_balances()
             logger.info(f" Balances:")
             logger.info(f" > Balances: {balances}")
             logger.info(f" > ADA balance: {math.floor(balances.get('lovelace', 0) / 1_000_000)} ₳")
-        else:
-            logger.info(f" [FAILURE] Could not load balances. (HTTP {response.status_code})")
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
             
         logger.info("==============================================")
         logger.info("               GENS/ADA ORDERBOOK             ")
         logger.info("==============================================")
-        response = api_client.get_trading_fees()
-        if response.status_code == 200:
-            fees = response.parsed
+        try:
+            fees = api_client.get_trading_fees()
             logger.info(f" Trading Fees:")
             logger.info(f" > Maker Fee: {int(fees.flat_maker_fee) / 1_000_000 } ₳ + {fees.percentage_maker_fee}%")
             logger.info(f" > Taker Fee: {int(fees.flat_taker_fee) / 1_000_000 } ₳ + {fees.percentage_taker_fee}%")
-        else:
-            logger.info(f" [FAILURE] Could not load trading fees. (HTTP {response.status_code})")
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
             
         logger.info("==============================================")
         gens_ada_market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
-        response = api_client.get_order_book(gens_ada_market_id)
-        if response.status_code == 200:
-            order_book_response = response
+        try:
+            order_book_response = api_client.get_order_book(gens_ada_market_id)
             logger.info(f" ADA/GENS Order Book:")
             
             logger.info(f" > ASKS:")
-            for order in response.parsed.asks:
+            for order in order_book_response.asks:
                 logger.info(f" > ask > Amount: {order.offer_amount}, Price: {order.price}")
 
             logger.info(f" > BIDS:")
-            for order in response.parsed.bids:
+            for order in order_book_response.bids:
                 logger.info(f" > bid > Amount: {order.offer_amount}, Price: {order.price}")
-        else:
-            logger.info(f" [FAILURE] Could not load ADA/GENS Order Book. (HTTP {response.status_code})")
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
         
         logger.info("==============================================")
         logger.info("                 OWN ORDERS                   ")
         logger.info("==============================================")
         market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
-        response = api_client.get_own_orders(gens_ada_market_id)
-        if response.status_code == 200:
-            order_book_response = response
+        
+        try:
+            response = api_client.get_own_orders(gens_ada_market_id)
             logger.info(f" Own orders:")
             
-            for order in response.parsed.asks:
+            for order in response.asks:
                 logger.info(f" > ask > Amount: {order.offer_amount}, Price: {order.price}")
 
-            for order in response.parsed.bids:
+            for order in response.bids:
                 logger.info(f" > bid > Amount: {order.offer_amount}, Price: {order.price}")
-        else:
-            logger.info(f" [FAILURE] Could not load ADA/GENS orders. (HTTP {response.status_code})")
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
+        
         logger.info("==============================================")
         logger.info("              GENS PRICE HISTORY              ")
         logger.info("==============================================")
         tgens_market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
         gens_market_id="lovelace_dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53"
-        response = api_client.get_price_history(tgens_market_id, "1h", "2024-01-01", "2024-01-02")
-        if response.status_code == 200:
-            for candle in response.parsed:
+        
+        try:
+            response = api_client.get_price_history(tgens_market_id, "1h", "2024-01-01", "2024-01-02")
+            for candle in response:
                 logger.info(f" > Closing price: {candle.base_close}")
-        else:
-            logger.info(f" [FAILURE] Could not load ADA/GENS price history. (HTTP {response.status_code})")
-
+        except ApiException as e:
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
 
     def execute(self, api_client, CONFIG, logger):
         current_time = datetime.now()
@@ -162,28 +158,29 @@ class strategy_a:
         if self.last_order_ref == None:
             # No order was placed -> place order.
             logger.info(f" > PLACING ORDER....")
-            response = api_client.place_order(
+            try: 
+                response = api_client.place_order(
                          offered_amount="1",
                          offered_token="lovelace",
-                         price_token="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53",
+                         price_token="c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53",
                          price_amount="1"
-            )
-            logger.info(f" > RESPONSE STATUS CODE: {response.status_code}")
-            if response.status_code == 200:
-                logger.info(f"order_ref: {response.parsed.order_ref}")
-                self.last_order_ref=response.parsed.order_ref
+                )
+                logger.info(f" > [OK] PLACED NEW ORDER")
+                logger.info(f"order_ref: {response.order_ref}")
+                self.last_order_ref = response.order_ref
+            except:
+                logger.exception(f" > [FAILED] could not place order. ❌")
             
         else:
             # An order has already been placed -> cancel it.
             ref = self.last_order_ref
             shortened_ref = f"{ref[:8]}...{ref[-8:]}" if len(ref) > 16 else ref
             logger.info(f" > CANCELING {shortened_ref}")
-            response = api_client.cancel_order(order_reference=self.last_order_ref)
-            logger.info(f" > RESPONSE STATUS CODE: {response.status_code}")
-            if response.status_code == 200:
+            try: 
+                response = api_client.cancel_order(order_reference=self.last_order_ref)
                 logger.info(f" > [OK] cancelled: {shortened_ref}")
-            else:
-                logger.info(f" > [FAILED] could not cancel: {shortened_ref} ❌")
+            except:
+                logger.exception(f" > [FAILED] could not cancel: {shortened_ref} ❌")
             
             # Reset the reference, so we place a new order.
             self.last_order_ref=None
