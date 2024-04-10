@@ -17,6 +17,7 @@ from client.api.orders import post_orders
 from client.api.orders import delete_orders
 from client.api.orders import get_order_books_market_id
 from client.api.historical_prices import get_historical_prices_maestro_market_dex
+import time
 
 class ApiException(Exception):
     def __init__(self, status_code, response):
@@ -28,9 +29,10 @@ class Api:
 
     own_address = None
 
-    def __init__(self, client, own_address):
+    def __init__(self, client, own_address, wait_for_confirmation):
         self.client = client
         self.own_address = own_address
+        self.wait_for_confirmation = wait_for_confirmation
 
     def process_response(self, response):
         if response.status_code < 300:
@@ -81,6 +83,7 @@ class Api:
         body.price_token=price_token
         body.price_amount=price_amount
         response: Response[post_order_response] = post_orders.sync_detailed(client=self.client, body=body)
+        time.sleep(self.wait_for_confirmation)
         return self.process_response(response)
 
     def cancel_order(self, order_reference):
@@ -88,4 +91,5 @@ class Api:
           body.address=self.own_address
           body.order_references=[order_reference]
           response: Response[delete_order_response] = delete_orders.sync_detailed(client=self.client, body=body)
+          time.sleep(self.wait_for_confirmation)
           return self.process_response(response)

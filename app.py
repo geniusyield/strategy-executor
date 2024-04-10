@@ -69,7 +69,7 @@ def worker():
                 time.sleep(RETRY_DELAY)
                 # The loop will then automatically retry
 
-        api_client = Api(client, own_address)
+        api_client = Api(client, own_address, 90)
         logger.info("==============================================")
         logger.info("[OK] Initialization is done ✅ ")
     
