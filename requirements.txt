@@ -41,3 +41,4 @@ wcwidth==0.2.13
 Flask==3.0
 gunicorn==21
 openapi-python-client==0.19.1
+talipp==2.2.0

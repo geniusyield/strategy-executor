@@ -66,10 +66,14 @@ class Api:
         response: Response[order_book_info] = get_order_books_market_id.sync_detailed(client=self.client, market_id=market_id, address=self.own_address)
         return self.process_response(response)
 
-    def get_price_history(self, market_id, resolution, from_date, until_date):
-        response: Response[order_book_info] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="minswap", resolution=resolution, from_=from_date, to=until_date)
+    def get_price_history(self, market_id, resolution, from_date, until_date, sort="asc", limit=1000):
+        response: Response[order_book_info] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="genius-yield", resolution=resolution, from_=from_date, to=until_date)
         return self.process_response(response)
-    
+
+    def get_market_price(self, market_id):
+        response: Response[order_book_info] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="genius-yield", resolution="1m", sort="desc", limit=1)
+        return self.process_response(response)
+
     def place_order(self, offered_amount, offered_token, price_token, price_amount):
         body: post_order_parameters = post_order_parameters.PostOrderParameters()
         body.offer_amount=offered_amount
