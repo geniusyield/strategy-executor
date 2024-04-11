@@ -29,10 +29,11 @@ class Api:
 
     own_address = None
 
-    def __init__(self, client, own_address, wait_for_confirmation):
+    def __init__(self, client, own_address, wait_for_confirmation, logger):
         self.client = client
         self.own_address = own_address
         self.wait_for_confirmation = wait_for_confirmation
+        self.logger = logger
 
     def process_response(self, response):
         if response.status_code < 300:
@@ -77,19 +78,25 @@ class Api:
         return self.process_response(response)
 
     def place_order(self, offered_amount, offered_token, price_token, price_amount):
+        self.logger.info(f"[PLACE-ORDER] Placing order...")
         body: post_order_parameters = post_order_parameters.PostOrderParameters()
         body.offer_amount=offered_amount
         body.offer_token=offered_token
         body.price_token=price_token
         body.price_amount=price_amount
         response: Response[post_order_response] = post_orders.sync_detailed(client=self.client, body=body)
+        self.logger.info(f"[PLACE-ORDER] Waiting {self.wait_for_confirmation} seconds for confirmation...")
         time.sleep(self.wait_for_confirmation)
+        self.logger.info(f"[PLACE-ORDER] [OK] Done!")
         return self.process_response(response)
 
     def cancel_order(self, order_reference):
+          self.logger.info(f"[CANCEL-ORDER] Canceling order...")
           body: delete_order_parameters = delete_order_parameters.DeleteOrderParameters()
           body.address=self.own_address
           body.order_references=[order_reference]
           response: Response[delete_order_response] = delete_orders.sync_detailed(client=self.client, body=body)
+          self.logger.info(f"[CANCEL-ORDER] Waiting {self.wait_for_confirmation} seconds for confirmation...")
           time.sleep(self.wait_for_confirmation)
+          self.logger.info(f"[CANCEL-ORDER] [OK] Done!")
           return self.process_response(response)

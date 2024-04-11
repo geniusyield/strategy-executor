@@ -36,6 +36,7 @@ services:
       EXECUTION_DELAY: 90 # Time period in seconds to wait between strategy exeuctions
       STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
       RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
+      CONFIRMATION_DELAY: 90
       STRATEGY: strategy_a
       CONFIG: |
         setting_1: 50 ADA
@@ -51,6 +52,7 @@ services:
       EXECUTION_DELAY: 15 # Time period in seconds to wait between strategy exeuctions
       STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
       RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
+      CONFIRMATION_DELAY: 90
       STRATEGY: strategy_b
       CONFIG: |
         setting_1: 123 ADA
@@ -66,6 +68,7 @@ services:
       EXECUTION_DELAY: 1 # Time period in seconds to wait between strategy exeuctions
       STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
       RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
+      CONFIRMATION_DELAY: 90
       STRATEGY: bollinger_bands_strategy
       CONFIG: |
         BASE_ASSET: lovelace

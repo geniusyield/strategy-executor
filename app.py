@@ -29,6 +29,7 @@ STRATEGY = check_env_variable('STRATEGY')
 EXECUTION_DELAY = int(check_env_variable('EXECUTION_DELAY'))
 STARTUP_DELAY = int(check_env_variable('STARTUP_DELAY'))
 RETRY_DELAY = int(check_env_variable('RETRY_DELAY'))
+CONFIRMATION_DELAY = int(check_env_variable('CONFIRMATION_DELAY'))
 CONFIG = yaml.safe_load(check_env_variable('CONFIG'))
 
 @app.route('/')
@@ -56,20 +57,21 @@ def worker():
             try:
                 response: Response[settings] = get_settings.sync_detailed(client=client)
                 logger.info(f" [OK] Backend is available at: {BACKEND_URL} ✅ ")
+                logger.info(f" BACKEND CONFIGURATION: ")
                 logger.info(f" > Version: {response.parsed.version}")
                 logger.info(f" > Backend: {response.parsed.backend}")
                 logger.info(f" > Revision: {response.parsed.revision}")
-                logger.info(f" > Address: {response.parsed.address}")
+                logger.info(f" > Addr.: {response.parsed.address}")
                 own_address = response.parsed.address
                 attempt_successful = True
             except Exception as e:
                 # If an exception occurs, print the message and wait for 5 seconds
-                logger.info(f" > Backend not available. Retry in {RETRY_DELAY} seconds...")
+                logger.info(f" > Backend is not available. Retry in {RETRY_DELAY} seconds...")
                 logger.debug(e)
                 time.sleep(RETRY_DELAY)
                 # The loop will then automatically retry
 
-        api_client = Api(client, own_address, 90)
+        api_client = Api(client, own_address, CONFIRMATION_DELAY, logger)
         logger.info("==============================================")
         logger.info("[OK] Initialization is done ✅ ")
     

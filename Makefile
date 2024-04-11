@@ -7,6 +7,10 @@ start:
 	docker compose up -d --build $(DEFAULT_STRATEGY)
 	docker compose logs -f strategy_a
 
+start-server:
+	docker compose up -d server
+	docker compose logs -f server
+
 start-a:
 	docker compose up -d --build strategy_a
 	docker compose logs -f

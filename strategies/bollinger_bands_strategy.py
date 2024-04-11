@@ -3,7 +3,7 @@ import math
 from api import ApiException
 from decimal import Decimal
 import asyncio
-import logging
+import time
 
 from talipp.indicators import BB
 
@@ -31,7 +31,7 @@ class bollinger_bands_strategy:
         self.base_asset = CONFIG["BASE_ASSET"]
         self.target_asset = CONFIG["TARGET_ASSET"]
         self.market = f"{self.base_asset}_{self.target_asset}"
-        logger.info(" CONFIG:")
+        logger.info(" STRATEGY CONFIGURATION:")
         logger.info(f" > base_asset         : {self.base_asset}")
         logger.info(f" > target_asset       : {self.target_asset}")
         logger.info(f" > market             : {self.market}")
@@ -43,91 +43,94 @@ class bollinger_bands_strategy:
         self.bb = BB(self.period, self.std_dev_multiplier)
 
     def place_buy_order(self, api_client, logger):
-        logging.info("Placing BUY order...")
+        logger.info(" ⚙️ Placing BUY order...")
 
+        if not self.buy_order_ref == None:
+            logger.info(f" > Already placed BUY order. Nothing to do.")
+            return
+        
         if self.sell_order_ref == None:
-            logger.info(f" > No SELL order. Nothing to cancel.")
+            logger.debug(f" > No SELL order. Nothing to cancel.")
         else:
             try:
                 response = api_client.cancel_order(self.sell_order_ref)
                 logger.info(f" > [OK] Canceled SELL order: {self.sell_order_ref}")
                 self.sell_order_ref = None
             except:
-                logger.exception(f" > [FAILED] could not cancel order. ❌")
-
+                logger.exception(f" > ⚠️ [FAILED] could not cancel order: {self.sell_order_ref} ⚠️")
+                logger.error(f" > Exception! ")
         try:
-            # Get available balance (keep 100 ADA):
             HUNDRED_ADA=100000000
-            balance_available = api_client.get_balances()[self.base_asset] - 100000000
-            logging.info(" > balance_available : {balance_available}")
-            logging.info(" > self.position_size: {self.position_size}")
+            balance_available = api_client.get_balances().get(self.base_asset, 0) - 100000000
+            logger.debug(f" > balance_available : {balance_available}")
+            logger.debug(f" > self.position_size: {self.position_size}")
 
             # Get best ask price:
             order_book = api_client.get_order_book(self.market)
             best_ask_price = float(order_book.asks[-1].price)
             order_size = min(self.position_size, balance_available) / float(best_ask_price)
             if not order_size:
-                logging.info("Insufficient balance to place BUY order!")
+                logger.info(" ⚠️ Insufficient balance to place BUY order! ⚠️")
                 return
 
-            logging.info(" > Place BUY order: {position_size}...")
-            try:
-                offered_amount = int(math.floor(order_size))
-                response = api_client.place_order(
-                         offered_amount=f"{offered_amount}",
-                         offered_token=self.base_asset,
-                         price_token=self.target_asset,
-                         price_amount=f"{int(math.floor(offered_amount * best_ask_price))}"
-                )
-                logger.info(f" > [OK] PLACED NEW ORDER: {response.order_ref}")
-                self.buy_order_ref=response.order_ref
-            except:
-                logger.exception(f" > [FAILED] could not place BUY order. ❌")
+            logger.info(f" > Place BUY order: {order_size}...")
+            offered_amount = int(math.floor(order_size))
+            response = api_client.place_order(
+                     offered_amount=f"{offered_amount}",
+                     offered_token=self.base_asset,
+                     price_token=self.target_asset,
+                     price_amount=f"{int(math.floor(offered_amount * best_ask_price))}"
+            )
+            logger.info(f" > [OK] PLACED NEW BUY ORDER: {response.order_ref}")
+            self.buy_order_ref=response.order_ref
         except:
-            logging.exception("Could not place BUY order.")
+            logger.error(" > ⚠️ [FAILED] Could not place BUY order. ⚠️")
+            logger.exception(f" > Exception! ")
 
     def place_sell_order(self, api_client, logger):
-        logging.info("Placing SELL order...")
+        logger.info("Placing SELL order...")
+        
+        if not self.sell_order_ref == None:
+            logger.info(f" > Already placed SELL order. Nothing to do.")
+            return
 
         if self.buy_order_ref == None:
-            logger.info(f" > No buy order. Nothing to cancel.")
+            logger.debug(f" > No BUY order placed. Nothing to cancel.")
         else:
             try:
+                logger.info(f" ⚙️ Canceling BUY order: {self.buy_order_ref}")
                 response = api_client.cancel_order(self.buy_order_ref)
                 logger.info(f" > [OK] Canceled BUY order: {self.buy_order_ref}")
                 self.buy_order_ref = None
             except:
-                logger.exception(f" > [FAILED] could not cancel order. ❌")
-
+                logger.error(f" > ⚠️ [FAILED] could not cancel order: {self.buy_order_ref} ⚠️")
+                logger.exception(f" > Exception! ")
         try:
-            # Get balance:
             balance_available = api_client.get_balances().get(self.target_asset, 0)
-            logging.info(" > balance_available : {balance_available}")
+            logger.info(f" > balance_available : {balance_available}")
 
-            # Get best bid price:
             order_book = api_client.get_order_book(self.market)
             best_bid_price = order_book.bids[-1].price
             order_size = min(self.position_size, balance_available) / float(best_bid_price)
             if not order_size:
-                logging.info("Insufficient balance to place SELL order!")
+                logger.info("⚠️ Insufficient balance to place SELL order! ⚠️")
                 return
 
-            logging.info(" > Place SELL order: {order_size} at ...")
-            try:
-                response = api_client.place_order(
-                         offered_amount=f"{int(math.floor(order_size))}",
-                         offered_token=self.target_asset,
-                         price_token=self.target_asset,
-                         price_amount=f"{int(math.floor(best_bid_price))}"
-                )
-                logger.info(f" > [OK] PLACED NEW ORDER: {response.order_ref}")
-                self.buy_order_ref=response.order_ref
-            except:
-                logger.exception(f" > [FAILED] could not SELL place order. ❌")
+            logger.info(f" > Place SELL order: {order_size} at ...")
+            response = api_client.place_order(
+              offered_amount=f"{int(math.floor(order_size))}",
+              offered_token=self.target_asset,
+              price_token=self.target_asset,
+              price_amount=f"{int(math.floor(best_bid_price))}"
+            )
+            logger.info(f" > [OK] PLACED NEW SELL ORDER: {response.order_ref}")
+            self.sell_order_ref=response.order_ref
         except:
-            logging.exception("Could not place SELL order.")
+            logger.error(f" > ⚠️ [FAILED] Could not place SELL order. ⚠️")
+            logger.exception(f" > Exception! ")
 
     def process_candle(self, candle):
+        self.logger.info(f"--------------------------------------------------------------------------------")
         self.logger.info(f" > processsing candle - timestamp: {candle.timestamp} - base_close: {candle.base_close}")
 
         if (not self.last_candle == None) and (self.last_candle.timestamp == candle.timestamp):
@@ -145,18 +148,19 @@ class bollinger_bands_strategy:
 
         self.logger.debug(f" > self.bb.input_values: {self.bb.input_values}")
 
-        if not self.initialized:
-            self.logger.debug(f" > Initializing.... ")
-            return
+        # TODO: comment out, since this is only used for testing.
+        #if not self.initialized:
+        #    self.logger.debug(f" > Initializing.... ")
+        #    return
 
-        if len(self.bb) < 2:
-            return
-        if self.bb[-1] == None or self.bb[-2] == None:
-            return
-
-        self.logger.debug(f" > self.bb: {self.bb}")
-        self.logger.debug(f" > self.bb._values: {self._values}")
-        self.logger.debug(f" > self.bb.input_values: {self.bb.input_values}")
+        if len(self.bb) < 2 or self.bb[-1] == None or self.bb[-2] == None:
+           self.logger.info(f" Bollinger Bands: Initializing...  ⚙️ ⏳ ")
+           self.logger.info(f" > Upper band: Not available.")
+           self.logger.info(f" > Lower band: Not available.")
+           self.logger.info(f" Orders: ")
+           self.logger.info(f" > On-Chain BUY order: {self.buy_order_ref} ")
+           self.logger.info(f" > On-Chain SELL order: {self.sell_order_ref} ")
+           return
 
         self.logger.info(f" Bollinger Bands: ")
         self.logger.info(f" > Upper band: {self.bb[-1].ub}")
@@ -164,12 +168,17 @@ class bollinger_bands_strategy:
 
         # Price moved below lower band ?
         if self._values[-2] >= self.bb[-2].lb and self._values[-1] < self.bb[-1].lb:
-            self.logger.info(f" > Price moved below the lower band -> BUY!")
+            self.logger.info(f" > Price moved below the lower band -> BUY!  🛒 🛒 🛒 ")
             self.place_buy_order(self.api_client, self.logger)
         # Price moved above upper band ?
         elif self._values[-2] <= self.bb[-2].ub and self._values[-1] > self.bb[-1].ub:
-            self.logger.info(f" > Price moved above the upper band -> SELL!")
+            self.logger.info(f" > Price moved above the upper band -> SELL!  💲 💲 💲 ")
             self.place_sell_order(self.api_client, self.logger)
+        
+        self.logger.info(f" Orders: ")
+        self.logger.info(f" > On-Chain BUY order: {self.buy_order_ref} ")
+        self.logger.info(f" > On-Chain SELL order: {self.sell_order_ref} ")
+
 
     def execute(self, api_client, CONFIG, logger):
         current_time = datetime.now()
@@ -179,6 +188,8 @@ class bollinger_bands_strategy:
             candles = api_client.get_price_history(self.market, resolution="1m", from_date=None, until_date=None, sort="asc", limit=self.period)
             for candle in candles[:-1]:
                 self.process_candle(candle)
+                # TODO: remove
+                time.sleep(1)
         else:
             time_since_last_execution = (current_time - self.last_execution_time).total_seconds()
             logger.info(f"Last executed: {self.last_execution_time}")
@@ -195,7 +206,8 @@ class bollinger_bands_strategy:
             candle=get_market_price[0]
             logger.info(f" > Base closing price: {candle.base_close}")
             self.process_candle(candle)
-        except ApiException as e:
-            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
+        except:
+            logger.error(f" > ⚠️ [FAILED] could not process candle: {candle} ⚠️")
+            logger.exception(f" > Exception! ")
 
         logger.info(f" > EXECUTION FINISHED.")

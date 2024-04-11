@@ -55,7 +55,7 @@ class strategy_a:
             markets = api_client.get_markets()
             for market in markets:
                 logger.info(f" > Market: {render_cardano_asset_name_with_policy(market.base_asset)} / {render_cardano_asset_name_with_policy(market.target_asset)}")
-                logger.info(f" > {market.market_id}")
+                logger.debug(f" > {market.market_id}")
         except ApiException as e:
             logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
         
@@ -81,9 +81,9 @@ class strategy_a:
             logger.info(f" > ADA balance: {math.floor(balances.get('lovelace', 0) / 1_000_000)} ₳")
         except ApiException as e:
             logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
-            
+        
         logger.info("==============================================")
-        logger.info("               GENS/ADA ORDERBOOK             ")
+        logger.info("              TRADING FEES                    ")
         logger.info("==============================================")
         try:
             fees = api_client.get_trading_fees()

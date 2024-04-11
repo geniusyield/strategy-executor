@@ -31,11 +31,12 @@ if [ -z "$CONFIG" ]; then
 fi
 echo " [OK] Config is valid"
 echo "==============[CONFIG]==============="
-echo " BACKEND_URL     : $BACKEND_URL"
-echo " EXECUTION_DELAY : $EXECUTION_DELAY seconds"
-echo " STARTUP_DELAY   : $STARTUP_DELAY seconds"
-echo " RETRY_DELAY     : $RETRY_DELAY seconds"
-echo " STRATEGY        : $STRATEGY"
+echo " BACKEND_URL        : $BACKEND_URL"
+echo " EXECUTION_DELAY    : $EXECUTION_DELAY seconds"
+echo " STARTUP_DELAY      : $STARTUP_DELAY seconds"
+echo " RETRY_DELAY        : $RETRY_DELAY seconds"
+echo " CONFIRMATION_DELAY : $CONFIRMATION_DELAY seconds"
+echo " STRATEGY           : $STRATEGY"
 echo "====================================="
 echo "Starting trading strategy executor..."
 set -x
