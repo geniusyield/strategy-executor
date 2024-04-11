@@ -23,6 +23,9 @@ start-bb:
 	docker compose up -d --build bollinger_bands_strategy
 	docker compose logs -f bollinger_bands_strategy
 
+server-logs:
+	docker compose logs -f server
+
 stop:
 	docker compose down
 
