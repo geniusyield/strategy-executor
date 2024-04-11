@@ -35,7 +35,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Copy the source code into the container.
 COPY . .
 
-RUN ./generate_client.sh
+RUN /bin/bash -c /app/generate_client.sh
 
 # Expose the port that the application listens on.
 EXPOSE 8080
