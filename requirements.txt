@@ -7,7 +7,7 @@ debugpy==1.8.1
 decorator==5.1.1
 executing==2.0.1
 fsspec==2024.2.0
-idna==3.6
+idna==3.7
 ipykernel==6.29.2
 ipython==8.21.0
 jedi==0.19.1
