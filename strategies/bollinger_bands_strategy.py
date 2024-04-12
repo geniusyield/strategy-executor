@@ -146,11 +146,6 @@ class bollinger_bands_strategy:
 
         self.logger.debug(f" > self.bb.input_values: {self.bb.input_values}")
 
-        # TODO: comment out, since this is only used for testing.
-        #if not self.initialized:
-        #    self.logger.debug(f" > Initializing.... ")
-        #    return
-
         if len(self.bb) < 2 or self.bb[-1] == None or self.bb[-2] == None:
            self.logger.info(f" Bollinger Bands: Initializing...  ⚙️ ⏳ ")
            self.logger.info(f" > Upper band: Not available.")
@@ -186,7 +181,6 @@ class bollinger_bands_strategy:
             candles = api_client.get_price_history(self.market, resolution="1m", sort="asc", limit=self.period)
             for candle in candles[:-1]:
                 self.process_candle(candle)
-                # TODO: remove
                 time.sleep(1)
         else:
             time_since_last_execution = (current_time - self.last_execution_time).total_seconds()
