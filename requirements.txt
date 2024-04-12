@@ -38,7 +38,7 @@ types-requests==2.31.0.20240125
 tzdata==2024.1
 urllib3==2.2.0
 wcwidth==0.2.13
-Flask==3.0
+flask==3.0
 gunicorn==21
 openapi-python-client==0.19.1
 talipp==2.2.0

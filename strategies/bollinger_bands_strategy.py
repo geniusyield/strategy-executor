@@ -1,8 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import math
-from api import ApiException
-from decimal import Decimal
-import asyncio
+from api import Api
 import time
 
 from talipp.indicators import BB
@@ -180,7 +178,7 @@ class bollinger_bands_strategy:
         self.logger.info(f" > On-Chain SELL order: {self.sell_order_ref} ")
 
 
-    def execute(self, api_client, CONFIG, logger):
+    def execute(self, api_client : Api, CONFIG, logger):
         current_time = datetime.now()
 
         if self.last_execution_time is None:
@@ -207,7 +205,7 @@ class bollinger_bands_strategy:
             logger.info(f" > Base closing price: {candle.base_close}")
             self.process_candle(candle)
         except:
-            logger.error(f" > ⚠️ [FAILED] could not process candle: {candle} ⚠️")
+            logger.error(f" > ⚠️ [FAILED] could not process candle ⚠️")
             logger.exception(f" > Exception! ")
 
         logger.info(f" > EXECUTION FINISHED.")

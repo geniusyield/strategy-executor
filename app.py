@@ -1,6 +1,8 @@
 from client import AuthenticatedClient
-from client.models import settings
+from client.models import ErrorResponse, Settings
 from client.api.settings import get_settings
+from client.types import Response
+from typing import cast, Union
 from flask import Flask, jsonify
 import threading
 import time
@@ -42,8 +44,6 @@ def load_strategy(strategy_class):
     module = importlib.import_module(f".{strategy_class}", ".strategies")
     if hasattr(module, 'init'):
         module.init()
-    if hasattr(module, 'configure'):
-        module.configure(my_config)
     strategy_class_ref  = getattr(module, strategy_class)
     return strategy_class_ref
 
@@ -51,19 +51,23 @@ def worker():
     client = AuthenticatedClient(base_url="http://server:8082/v0/", token=SERVER_API_KEY, auth_header_name="api-key", prefix="")
     with client as client:
         attempt_successful = False
-        own_address = None
+        own_address : str = ""
         logger.info(f" Connecting to backend at: {BACKEND_URL}...")
         while not attempt_successful:
             try:
-                response: Response[settings] = get_settings.sync_detailed(client=client)
-                logger.info(f" [OK] Backend is available at: {BACKEND_URL} ✅ ")
-                logger.info(f" BACKEND CONFIGURATION: ")
-                logger.info(f" > Version: {response.parsed.version}")
-                logger.info(f" > Backend: {response.parsed.backend}")
-                logger.info(f" > Revision: {response.parsed.revision}")
-                logger.info(f" > Addr.: {response.parsed.address}")
-                own_address = response.parsed.address
-                attempt_successful = True
+                response: Response[ErrorResponse | Settings] = get_settings.sync_detailed(client=client)
+                settings_response: Response[Settings] = cast(Response[Settings], response)
+                if (settings := settings_response.parsed) is not None:
+                    logger.info(f" [OK] Backend is available at: {BACKEND_URL} ✅ ")
+                    logger.info(f" BACKEND CONFIGURATION: ")
+                    logger.info(f" > Version: {settings.version}")
+                    logger.info(f" > Backend: {settings.backend}")
+                    logger.info(f" > Revision: {settings.revision}")
+                    logger.info(f" > Addr.: {settings.address}")
+                    own_address = str(settings.address)
+                    attempt_successful = True
+                else:
+                    logger.info(f" > Could not parse response. Retry again...")
             except Exception as e:
                 # If an exception occurs, print the message and wait for 5 seconds
                 logger.info(f" > Backend is not available. Retry in {RETRY_DELAY} seconds...")

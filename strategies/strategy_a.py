@@ -17,12 +17,12 @@ def render_cardano_asset_name_with_policy(policy_asset_string):
     try:
         # Attempt to decode from hexadecimal to bytes, then decode bytes to a UTF-8 string
         readable_string = bytes.fromhex(hex_asset_name).decode('utf-8')
-    except ValueError:
-        # In case of a ValueError, the input was not valid hexadecimal
-        readable_string = f"Invalid hexadecimal: {hex_asset_name}"
     except UnicodeDecodeError:
         # If bytes cannot be decoded to UTF-8, return the original hexadecimal
         readable_string = f"Non-UTF-8 data: {hex_asset_name}"
+    except ValueError:
+        # In case of a ValueError, the input was not valid hexadecimal
+        readable_string = f"Invalid hexadecimal: {hex_asset_name}"
     
     return readable_string
 

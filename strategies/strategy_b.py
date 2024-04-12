@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 class strategy_b:
     def __init__(self, client, CONFIG, logger):

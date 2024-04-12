@@ -437,6 +437,9 @@ paths:
         "200":
           description: Canceled on-chain orders.
           content: { application/json: { schema: { $ref: '#/components/schemas/DeleteOrderResponse'}}}
+        "400": {description: Bad Request, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
+        "401": {description: Anauthorized access, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
+        "501": {description: Internal Server Error, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
   /order-books/{market_id}:
     parameters:
     - name: market_id
