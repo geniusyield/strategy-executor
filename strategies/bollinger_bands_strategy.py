@@ -59,7 +59,7 @@ class bollinger_bands_strategy:
                 logger.error(f" > Exception! ")
         try:
             HUNDRED_ADA=100000000
-            balance_available = api_client.get_balances().get(self.base_asset, 0) - 100000000
+            balance_available = api_client.get_balances().get(self.base_asset, 0) - HUNDRED_ADA
             logger.debug(f" > balance_available : {balance_available}")
             logger.debug(f" > self.position_size: {self.position_size}")
 
@@ -183,7 +183,7 @@ class bollinger_bands_strategy:
 
         if self.last_execution_time is None:
             logger.info("Executing for the first time")
-            candles = api_client.get_price_history(self.market, resolution="1m", from_date=None, until_date=None, sort="asc", limit=self.period)
+            candles = api_client.get_price_history(self.market, resolution="1m", sort="asc", limit=self.period)
             for candle in candles[:-1]:
                 self.process_candle(candle)
                 # TODO: remove
