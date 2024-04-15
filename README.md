@@ -1,3 +1,12 @@
+<h1 align="center">Trading Strategy Executor Framework</h1>
+<p align="center">
+  <a href="https://twitter.com/GeniusyieldO"><img src="https://img.shields.io/badge/-%40GeniusYieldO-F3F1EF?style=flat-square&logo=twitter&logoColor=1D9BF0" /></a>
+  <a href="https://discord.gg/TNHf4fs626"><img src="https://img.shields.io/badge/-Discord-414EEC?style=flat-square&logo=discord&logoColor=white" /></a>
+</p>
+
+> [!WARNING]
+> Algoritmic trading is a risky activity and running this bot can lead to loss of funds.
+
 # Python Strategy Executor
 A simple trading strategy executor framework to run trading strategies written in Python.
 
