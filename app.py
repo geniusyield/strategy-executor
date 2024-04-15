@@ -50,7 +50,7 @@ def load_strategy(strategy_class):
     return strategy_class_ref
 
 def worker():
-    client = AuthenticatedClient(base_url="http://server:8082/v0/", token=SERVER_API_KEY, auth_header_name="api-key", prefix="")
+    client = AuthenticatedClient(base_url=f"{BACKEND_URL}/v0/", token=SERVER_API_KEY, auth_header_name="api-key", prefix="")
     with client as client:
         attempt_successful = False
         own_address : str = ""
