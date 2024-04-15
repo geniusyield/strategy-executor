@@ -78,7 +78,7 @@ class strategy_a:
             balances = api_client.get_balances()
             logger.info(f" Balances:")
             logger.info(f" > Balances: {balances}")
-            logger.info(f" > ADA balance: {math.floor(balances.get('lovelace', 0) / 1_000_000)} ₳")
+            logger.info(f" > ADA balance: {math.floor(int(balances.get('lovelace', 0)) / 1_000_000)} ₳")
         except ApiException as e:
             logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
         

@@ -59,7 +59,7 @@ class bollinger_bands_strategy:
                 logger.error(f" > Exception! ")
         try:
             HUNDRED_ADA=100000000
-            balance_available = api_client.get_balances().get(self.base_asset, 0) - HUNDRED_ADA
+            balance_available = int(api_client.get_balances().get(self.base_asset, 0)) - HUNDRED_ADA
             logger.debug(f" > balance_available : {balance_available}")
             logger.debug(f" > self.position_size: {self.position_size}")
 
