@@ -1,5 +1,7 @@
 <h1 align="center">Trading Strategy Executor Framework</h1>
 <p align="center">
+  <a href="https://github.com/geniusyield/strategy-executor/commits/main"><img src="https://img.shields.io/github/commit-activity/m/geniusyield/strategy-executor?style=flat-square&label=Commit%20Activity" /></a>
+  <a href="https://github.com/geniusyield/strategy-executor/blob/main/LICENSE"><img alt="GitHub License" src="https://img.shields.io/github/license/geniusyield/strategy-executor?label=License&style=flat-square" /></a>
   <a href="https://twitter.com/GeniusyieldO"><img src="https://img.shields.io/badge/-%40GeniusYieldO-F3F1EF?style=flat-square&logo=twitter&logoColor=1D9BF0" /></a>
   <a href="https://discord.gg/TNHf4fs626"><img src="https://img.shields.io/badge/-Discord-414EEC?style=flat-square&logo=discord&logoColor=white" /></a>
 </p>
