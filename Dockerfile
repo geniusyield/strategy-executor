@@ -31,9 +31,15 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
-
 # Copy the source code into the container.
-COPY . .
+COPY *.py .
+COPY strategies/* strategies/
+COPY bot-api.yaml .
+COPY requirements.txt .
+COPY .flaskenv .
+
+# Copy the bash scripts into the container.
+COPY *.sh .
 
 RUN /bin/bash -c /app/generate_client.sh
 
