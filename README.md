@@ -17,7 +17,7 @@ A simple trading strategy executor framework to run trading strategies written i
 The easiest way to spin up the strategy executor is to use the make file:
 
 ```
-make start.-bb
+make start-bb
 ```
 
 This is going to spin up all the necessary services. The backend serving the bot-api and the strategy executor running the example strategy.
