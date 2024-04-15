@@ -43,6 +43,7 @@ Some example strategies are available in the strategies folder. These can be sta
 ```
  > make start-bb # starts strategy
  > make stop # stops the executor
+```
 
 For details please see the Makefile.
 
