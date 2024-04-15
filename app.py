@@ -17,6 +17,8 @@ from datetime import datetime
 import logging
 
 app = Flask(__name__)
+app.config['WTF_CSRF_ENABLED'] = True
+
 logger = logging.getLogger('gunicorn.error')
 
 def check_env_variable(var_name):
