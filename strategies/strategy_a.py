@@ -34,6 +34,19 @@ class strategy_a:
         self.last_order_ref=None
         logger.info(" > init: strategy_a instance created.")
         
+        logger.info("========================================================================")
+        logger.info("                                                                        ")
+        logger.info("                      ⚠️     WARNING!    ⚠️                            ")
+        logger.info("                                                                        ")
+        logger.info(" THIS IS ONLY A PROOF-OF-CONCEPT EXAMPLE STRATEGY IMPLEMENTATION.       ")
+        logger.info("                                                                        ")
+        logger.info(" IT IS ONLY INTENDED AS IMPLEMENTATION REFERENCE FOR TRADING STRATEGIES.")
+        logger.info("                                                                        ")
+        logger.info(" THIS IMPLEMENTATION IS NOT PRODUCTION-READY.                           ")
+        logger.info("                                                                        ")
+        logger.info("========================================================================")
+
+        
         logger.info("==============================================")
         logger.info("                   SETTINGS                   ")
         logger.info("==============================================")

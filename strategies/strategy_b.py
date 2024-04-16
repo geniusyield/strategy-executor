@@ -6,7 +6,19 @@ class strategy_b:
         self.client = client
         self.CONFIG = CONFIG
         self.logger = logger
-        print("Strategy B instance created")
+        logger.info("Strategy B instance created")
+        
+        logger.info("========================================================================")
+        logger.info("                                                                        ")
+        logger.info("                      ⚠️     WARNING!    ⚠️                            ")
+        logger.info("                                                                        ")
+        logger.info(" THIS IS ONLY A PROOF-OF-CONCEPT EXAMPLE STRATEGY IMPLEMENTATION.       ")
+        logger.info("                                                                        ")
+        logger.info(" IT IS ONLY INTENDED AS IMPLEMENTATION REFERENCE FOR TRADING STRATEGIES.")
+        logger.info("                                                                        ")
+        logger.info(" THIS IMPLEMENTATION IS NOT PRODUCTION-READY.                           ")
+        logger.info("                                                                        ")
+        logger.info("========================================================================")
 
     def execute(self, client, CONFIG, logger):
         current_time = datetime.now()
