@@ -38,6 +38,12 @@ SEED_PHRASE=[road, road, road, road, road, anger, anger, anger, anger, anger, an
 - `SEED_PHRASE` contains a YAML array with the words of the recovery phrase which is used to derive the wallet managed by the backend.
 
 # Example strategies
+
+> [!WARNING]
+> The example strategy implementations are intended only as reference implemnentations.
+>
+> These examples are not production-ready and are only inteded as code examples.
+
 Some example strategies are available in the strategies folder. These can be started by using make.
 
 ```
