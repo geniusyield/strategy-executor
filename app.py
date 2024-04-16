@@ -15,9 +15,14 @@ from api import Api
 from api import ApiException
 from datetime import datetime
 import logging
+from flask_wtf.csrf import CSRFProtect
 
+# Spin up Flask Application
 app = Flask(__name__)
-app.config['WTF_CSRF_ENABLED'] = True
+
+# Setup CSRF Protection.
+csrf = CSRFProtect(app)
+csrf.init_app(app)
 
 logger = logging.getLogger('gunicorn.error')
 
