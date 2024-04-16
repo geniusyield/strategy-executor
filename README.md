@@ -42,7 +42,9 @@ SEED_PHRASE=[road, road, road, road, road, anger, anger, anger, anger, anger, an
 > [!WARNING]
 > The example strategy implementations are intended only as reference implemnentations.
 >
-> These examples are not production-ready and are only inteded as code examples.
+> These examples are not production-ready and are only intended as code examples with
+> the goal to make it easier for trading strategy developers to implement their own
+> trading strategies based on the existing code examples in the strategies folder.
 
 Some example strategies are available in the strategies folder. These can be started by using make.
 
