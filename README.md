@@ -44,7 +44,7 @@ SEED_PHRASE=[road, road, road, road, road, anger, anger, anger, anger, anger, an
 >
 > These examples are not production-ready and are only intended as code examples with
 > the goal to make it easier for trading strategy developers to implement their own
-> trading strategies based on the existing code examples in the strategies folder.
+> trading strategies based on the existing code examples in the [strategies folder](https://github.com/geniusyield/strategy-executor/tree/main/strategies).
 
 Some example strategies are available in the strategies folder. These can be started by using make.
 
