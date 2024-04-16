@@ -8,6 +8,18 @@ from talipp.indicators import BB
 class bollinger_bands_strategy:
     def __init__(self, api_client, CONFIG, logger):
         logger.info(" > init: bollinger_bands_strategy instance created.")
+        
+        logger.info("========================================================================")
+        logger.info("                                                                        ")
+        logger.info("                      ⚠️     WARNING!    ⚠️                            ")
+        logger.info("                                                                        ")
+        logger.info(" THIS IS ONLY A PROOF-OF-CONCEPT EXAMPLE STRATEGY IMPLEMENTATION.       ")
+        logger.info("                                                                        ")
+        logger.info(" IT IS ONLY INTENDED AS IMPLEMENTATION REFERENCE FOR TRADING STRATEGIES.")
+        logger.info("                                                                        ")
+        logger.info(" THIS IMPLEMENTATION IS NOT PRODUCTION-READY.                           ")
+        logger.info("                                                                        ")
+        logger.info("========================================================================")
 
         # Internal state:
         self.start_time = datetime.now()
