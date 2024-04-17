@@ -14,7 +14,7 @@ services:
         coreProvider:
           maestroToken: <<CORE_MAESTRO_API_KEY>>
           turboSubmit: false
-        networkId: "preprod" # supported: mainnet ot preprod
+        networkId: "mainnet" # supported: mainnet ot preprod
         logging:
           - type: {tag: stderr}
             severity: "Debug" # Options: Debug, Info, Warning or Error
@@ -72,8 +72,11 @@ services:
       STRATEGY: bollinger_bands_strategy
       CONFIG: |
         BASE_ASSET: lovelace
-        TARGET_ASSET: c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53
-        POSITION_SIZE_LOVELACES: 10000000
+        # GENS for MAINNET:
+        TARGET_ASSET: dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53
+        # tGENS for PRERPOD:
+        # TARGET_ASSET: c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53
+        POSITION_SIZE_LOVELACES: 1000000
         STD_DEV_MULTIPLIER: 1.5
         PERIOD: 5
     depends_on:

@@ -52,7 +52,7 @@ class bollinger_bands_strategy:
         # Create the BB strategy instance with the config:
         self.bb = BB(self.period, self.std_dev_multiplier)
 
-    def place_buy_order(self, api_client, logger):
+    def place_buy_order(self, api_client, logger, price):
         logger.info(" ⚙️ Placing BUY order...")
 
         if not self.buy_order_ref == None:
@@ -70,26 +70,23 @@ class bollinger_bands_strategy:
                 logger.exception(f" > ⚠️ [FAILED] could not cancel order: {self.sell_order_ref} ⚠️")
                 logger.error(f" > Exception! ")
         try:
-            HUNDRED_ADA=100000000
-            balance_available = int(api_client.get_balances().get(self.base_asset, 0)) - HUNDRED_ADA
+            balance_available = int(api_client.get_balances().get(self.base_asset, 0))
             logger.debug(f" > balance_available : {balance_available}")
             logger.debug(f" > self.position_size: {self.position_size}")
 
-            # Get best ask price:
-            order_book = api_client.get_order_book(self.market)
-            best_ask_price = float(order_book.asks[-1].price)
-            order_size = min(self.position_size, balance_available) / float(best_ask_price)
+            order_size = min(self.position_size, balance_available)
             if not order_size:
                 logger.info(" ⚠️ Insufficient balance to place BUY order! ⚠️")
                 return
 
-            logger.info(f" > Place BUY order: {order_size}...")
             offered_amount = int(math.floor(order_size))
+
+            logger.info(f" > Place BUY order: {offered_amount}  at price {price}...")
             response = api_client.place_order(
                      offered_amount=f"{offered_amount}",
                      offered_token=self.base_asset,
                      price_token=self.target_asset,
-                     price_amount=f"{int(math.floor(offered_amount * best_ask_price))}"
+                     price_amount=f"{int(math.floor(offered_amount / price))}"
             )
             logger.info(f" > [OK] PLACED NEW BUY ORDER: {response.order_ref}")
             self.buy_order_ref=response.order_ref
@@ -97,7 +94,7 @@ class bollinger_bands_strategy:
             logger.error(" > ⚠️ [FAILED] Could not place BUY order. ⚠️")
             logger.exception(f" > Exception! ")
 
-    def place_sell_order(self, api_client, logger):
+    def place_sell_order(self, api_client, logger, price):
         logger.info("Placing SELL order...")
         
         if not self.sell_order_ref == None:
@@ -116,22 +113,21 @@ class bollinger_bands_strategy:
                 logger.error(f" > ⚠️ [FAILED] could not cancel order: {self.buy_order_ref} ⚠️")
                 logger.exception(f" > Exception! ")
         try:
-            balance_available = api_client.get_balances().get(self.target_asset, 0)
+            balance_available = int(api_client.get_balances().get(self.target_asset, 0))
             logger.info(f" > balance_available : {balance_available}")
-
-            order_book = api_client.get_order_book(self.market)
-            best_bid_price = order_book.bids[-1].price
-            order_size = min(self.position_size, balance_available) / float(best_bid_price)
+            order_size = min(self.position_size / price, balance_available)
+            logger.info(f" > order_size : {order_size}")
+            logger.info(f" > price : {price}")
             if not order_size:
                 logger.info("⚠️ Insufficient balance to place SELL order! ⚠️")
                 return
 
-            logger.info(f" > Place SELL order: {order_size} at ...")
+            logger.info(f" > Place SELL order: {order_size} at price {price}...")
             response = api_client.place_order(
               offered_amount=f"{int(math.floor(order_size))}",
               offered_token=self.target_asset,
-              price_token=self.target_asset,
-              price_amount=f"{int(math.floor(best_bid_price))}"
+              price_token=self.base_asset,
+              price_amount=f"{int(math.floor(order_size * price))}"
             )
             logger.info(f" > [OK] PLACED NEW SELL ORDER: {response.order_ref}")
             self.sell_order_ref=response.order_ref
@@ -144,7 +140,7 @@ class bollinger_bands_strategy:
         self.logger.info(f" > processsing candle - timestamp: {candle.timestamp} - base_close: {candle.base_close}")
 
         if (not self.last_candle == None) and (self.last_candle.timestamp == candle.timestamp):
-            self.logger.info(f" > Candle has already been processsed.")
+            self.logger.info(f" > Candle has already been processsed. Nothing to do.")
             return
 
         self.last_candle = candle
@@ -171,14 +167,18 @@ class bollinger_bands_strategy:
         self.logger.info(f" > Upper band: {self.bb[-1].ub}")
         self.logger.info(f" > Lower band: {self.bb[-1].lb}")
 
+        if self.initialized == False:
+            self.logger.info(f" -> Initializaion phase. Do not place orders yet.")
+            return
+
         # Price moved below lower band ?
         if self._values[-2] >= self.bb[-2].lb and self._values[-1] < self.bb[-1].lb:
-            self.logger.info(f" > Price moved below the lower band -> BUY!  🛒 🛒 🛒 ")
-            self.place_buy_order(self.api_client, self.logger)
+            self.logger.info(f" -> Price moved below the lower band -> BUY!  🛒 🛒 🛒 ")
+            self.place_buy_order(self.api_client, self.logger, candle.base_close)
         # Price moved above upper band ?
         elif self._values[-2] <= self.bb[-2].ub and self._values[-1] > self.bb[-1].ub:
-            self.logger.info(f" > Price moved above the upper band -> SELL!  💲 💲 💲 ")
-            self.place_sell_order(self.api_client, self.logger)
+            self.logger.info(f" -> Price moved above the upper band -> SELL!  💲 💲 💲 ")
+            self.place_sell_order(self.api_client, self.logger, candle.base_close)
         
         self.logger.info(f" Orders: ")
         self.logger.info(f" > On-Chain BUY order: {self.buy_order_ref} ")
@@ -190,10 +190,12 @@ class bollinger_bands_strategy:
 
         if self.last_execution_time is None:
             logger.info("Executing for the first time")
-            candles = api_client.get_price_history(self.market, resolution="1m", sort="asc", limit=self.period)
+            candles = api_client.get_price_history(self.market, resolution="1m", sort="asc", limit=self.period*5)
             for candle in candles[:-1]:
                 self.process_candle(candle)
                 time.sleep(1)
+            self.initialized = True
+            self.last_candle=None
         else:
             time_since_last_execution = (current_time - self.last_execution_time).total_seconds()
             logger.info(f"Last executed: {self.last_execution_time}")

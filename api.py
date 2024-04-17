@@ -61,7 +61,7 @@ class Api:
         return cast(OrderBookInfo, self.process_response(response))
 
     def get_price_history(self, market_id : str, resolution : str, from_date : str | Unset = UNSET, until_date: Unset | str = UNSET, sort="asc", limit=1000):
-        response: Response[ErrorResponse | List[MarketOHLC]] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="genius-yield", resolution=resolution, from_=from_date, to=until_date)
+        response: Response[ErrorResponse | List[MarketOHLC]] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="genius-yield", resolution=resolution, from_=from_date, to=until_date, sort=sort, limit=limit)
         return cast(List[MarketOHLC], self.process_response(response))
 
     def get_market_price(self, market_id : str):
@@ -70,6 +70,10 @@ class Api:
 
     def place_order(self, offered_amount : str, offered_token : str, price_token : str, price_amount : str):
         self.logger.info(f"[PLACE-ORDER] Placing order...")
+        self.logger.info(f"[PLACE-ORDER] offered_amount: {offered_amount}")
+        self.logger.info(f"[PLACE-ORDER] offered_token: {offered_token}")
+        self.logger.info(f"[PLACE-ORDER] price_token: {price_token}")
+        self.logger.info(f"[PLACE-ORDER] price_amount: {price_amount}")
         body = PostOrderParameters()
         body.offer_amount = offered_amount
         body.offer_token = offered_token
@@ -83,6 +87,7 @@ class Api:
 
     def cancel_order(self, order_reference : str):
           self.logger.info(f"[CANCEL-ORDER] Canceling order...")
+          self.logger.info(f"[CANCEL-ORDER] order_reference: {order_reference}")
           body = DeleteOrderParameters()
           body.address=self.own_address
           body.order_references=[order_reference]
