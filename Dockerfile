@@ -40,6 +40,7 @@ COPY .flaskenv .
 
 # Copy the bash scripts into the container.
 COPY *.sh .
+RUN chmod +x *.sh
 
 RUN /bin/bash -c /app/generate_client.sh
 
