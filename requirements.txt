@@ -39,7 +39,7 @@ tzdata==2024.1
 urllib3==2.2.0
 wcwidth==0.2.13
 flask==3.0
-gunicorn==21
+gunicorn==22.0.0
 openapi-python-client==0.19.1
 talipp==2.2.0
 Flask-WTF==1.2.1
