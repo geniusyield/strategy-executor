@@ -12,6 +12,14 @@
 # Python Strategy Executor
 A simple trading strategy executor framework to run trading strategies written in Python.
 
+# Video Tutorial
+
+<p align="center">
+  <a href="https://youtu.be/yilEO3myGLA?si=5GsHjx662EZUrLVp"><img src="https://github.com/geniusyield/strategy-executor/assets/2914096/6afee7ca-7550-48c5-b1a5-cde456a1b63f"></a>
+  <br />
+  <a href="https://youtu.be/yilEO3myGLA?si=5GsHjx662EZUrLVp">Trading Bot API | Explainer Video</a>
+</p>
+
 # Starting the Strategy Executor
 
 The easiest way to spin up the strategy executor is to use the make file:
