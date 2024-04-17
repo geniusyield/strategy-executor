@@ -12,6 +12,10 @@
 # Python Strategy Executor
 A simple trading strategy executor framework to run trading strategies written in Python.
 
+# Video tutorial
+
+[Youtube: Trading Bot API | Explainer Video](https://youtu.be/yilEO3myGLA?si=5GsHjx662EZUrLVp)
+
 # Starting the Strategy Executor
 
 The easiest way to spin up the strategy executor is to use the make file:
