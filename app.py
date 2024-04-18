@@ -99,10 +99,10 @@ def worker():
           try:
               strategy.execute(api_client, CONFIG, logger)
           except Exception:
-              logger.error(f" ❌ Strategy exeuction has failed with an exception. ❌ ")
+              logger.error(f" ❌ Strategy execution has failed with an exception. ❌ ")
               logger.exception(" ❌ Exception occurred:")
           else:
-              logger.info(f"[OK] Strategy exeuction has been finished ✅ ")
+              logger.info(f"[OK] Strategy execution has been finished ✅ ")
           finally:
               end_time = time.time()
               execution_time = end_time - start_time
