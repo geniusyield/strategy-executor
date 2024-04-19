@@ -60,12 +60,12 @@ class Api:
         response: Response[ErrorResponse | OrderBookInfo] = get_order_books_market_id.sync_detailed(client=self.client, market_id=market_id, address=self.own_address)
         return cast(OrderBookInfo, self.process_response(response))
 
-    def get_price_history(self, market_id : str, resolution : str, from_date : str | Unset = UNSET, until_date: Unset | str = UNSET, sort="asc", limit=1000):
-        response: Response[ErrorResponse | List[MarketOHLC]] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="genius-yield", resolution=resolution, from_=from_date, to=until_date, sort=sort, limit=limit)
+    def get_price_history(self, market_id : str, resolution : str, from_date : str | Unset = UNSET, until_date: Unset | str = UNSET, sort="asc", limit=100, dex="minswap"):
+        response: Response[ErrorResponse | List[MarketOHLC]] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex=dex, resolution=resolution, from_=from_date, to=until_date, sort=sort, limit=limit)
         return cast(List[MarketOHLC], self.process_response(response))
 
     def get_market_price(self, market_id : str):
-        response: Response[ErrorResponse | List[MarketOHLC]] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="genius-yield", resolution="1m", sort="desc", limit=1)
+        response: Response[ErrorResponse | List[MarketOHLC]] = get_historical_prices_maestro_market_dex.sync_detailed(client=self.client, market=market_id, dex="minswap", resolution="1m", sort="desc", limit=1)
         return cast(List[MarketOHLC], self.process_response(response))
 
     def place_order(self, offered_amount : str, offered_token : str, price_token : str, price_amount : str):
