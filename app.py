@@ -59,7 +59,10 @@ def worker():
     with client as client:
         attempt_successful = False
         own_address : str = ""
+        
         logger.info(f" Connecting to backend at: {BACKEND_URL}...")
+        logger.info(f" > Wait {STARTUP_DELAY} seconds for backend start...")
+        time.sleep(STARTUP_DELAY)
         while not attempt_successful:
             try:
                 response: Response[ErrorResponse | Settings] = get_settings.sync_detailed(client=client)
