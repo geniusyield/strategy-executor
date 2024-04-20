@@ -45,6 +45,10 @@ SEED_PHRASE=[road, road, road, road, road, anger, anger, anger, anger, anger, an
 - `SERVER_API_KEY`: is used to define an api-key that restricts access to the bot api backend. This must be passed with each request.
 - `SEED_PHRASE` contains a YAML array with the words of the recovery phrase which is used to derive the wallet managed by the backend.
 
+> [!IMPORTANT]
+> To use the Maestro provider backend on the bot server, you must have at least a Composer Maestro subscription because the Maestro DeFi Market API is only available starting from this tier.
+> For more information, please visit the [Maestro Subscription Details page](https://docs.gomaestro.org/Subscriptions).
+
 # Example strategies
 
 > [!WARNING]
