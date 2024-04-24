@@ -59,7 +59,10 @@ def worker():
     with client as client:
         attempt_successful = False
         own_address : str = ""
+
         logger.info(f" Connecting to backend at: {BACKEND_URL}...")
+        logger.info(f" > Wait {STARTUP_DELAY} seconds for backend start...")
+        time.sleep(STARTUP_DELAY)
         while not attempt_successful:
             try:
                 response: Response[ErrorResponse | Settings] = get_settings.sync_detailed(client=client)
@@ -85,12 +88,12 @@ def worker():
         api_client = Api(client, own_address, CONFIRMATION_DELAY, logger)
         logger.info("==============================================")
         logger.info("[OK] Initialization is done ✅ ")
-    
+
         logger.info(f"Loading strategy {STRATEGY}")
         strategy_class_ref = load_strategy(STRATEGY)
         strategy = strategy_class_ref(api_client, CONFIG, logger)
         logger.info(f" [OK] Strategy is loaded.")
-    
+
         while True:
           logger.info("==============================================")
           logger.info(f" > Invoking strategy: {STRATEGY}... ⚙️⏳ ")
@@ -108,7 +111,7 @@ def worker():
               execution_time = end_time - start_time
               logger.info(f"End time: {datetime.fromtimestamp(start_time).strftime('%Y-%m-%d %H:%M:%S')}")
               logger.info(f"Execution time: {execution_time:.4f} seconds")
-    
+
           logger.info(f"Wait {EXECUTION_DELAY}s until next execution...")
           time.sleep(EXECUTION_DELAY)
 
