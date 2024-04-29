@@ -65,6 +65,7 @@ def worker():
         time.sleep(STARTUP_DELAY)
         while not attempt_successful:
             try:
+                logger.info(f" > Connecting to backend...")
                 response: Response[ErrorResponse | Settings] = get_settings.sync_detailed(client=client)
                 settings_response: Response[Settings] = cast(Response[Settings], response)
                 if (settings := settings_response.parsed) is not None:
@@ -79,12 +80,13 @@ def worker():
                 else:
                     logger.info(f" > Could not parse response. Retry again...")
             except Exception as e:
-                # If an exception occurs, print the message and wait for 5 seconds
+                # If an exception occurs, print the message and wait for the backend to start:
+                logger.info(f" > Exception: {str(e)}")
                 logger.info(f" > Backend is not available. Retry in {RETRY_DELAY} seconds...")
-                logger.debug(e)
                 time.sleep(RETRY_DELAY)
                 # The loop will then automatically retry
 
+        logger.info(f" > [OK] Succesfully connected to backend.")
         api_client = Api(client, own_address, CONFIRMATION_DELAY, logger)
         logger.info("==============================================")
         logger.info("[OK] Initialization is done ✅ ")
