@@ -58,7 +58,7 @@ components:
           network: { type: string, enum: ["preprod", "mainnet"], examples: ["mainnet", "preprod"] },
           version: { type: string, examples: ["1.0.2"], pattern: "[0-9].[0-9].[0-9]" },
           revision: { type: string, examples: ["c7cc91eec7f3d50b8de196a01034b0cc7097ae59"] },
-          backend: { type: string, enum: ["mmb"]},
+          backend: { type: string },
           address: { type: string, examples: ["addr1v87wwwe4f59dqc50qyt0ckcs0kvh7glpweyal2k5nsgyucgk6038f"] },
           collateral_utxo: { type: string, examples: ["33be2c9754bb3c2ea32039722cff2e34cva09d746283ab1234ce7155866e3d30#3"] }
         }
