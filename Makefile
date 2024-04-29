@@ -3,6 +3,9 @@ all : start stop
 
 DEFAULT_STRATEGY := strategy_a
 
+build:
+	docker build -t ghcr.io/geniusyield/strategy-executor .
+
 start:
 	docker compose up -d --build $(DEFAULT_STRATEGY)
 	docker compose logs -f strategy_a
