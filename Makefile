@@ -8,7 +8,7 @@ build:
 
 start:
 	docker compose up -d --build $(DEFAULT_STRATEGY)
-	docker compose logs -f strategy_a
+	docker compose logs -f $(DEFAULT_STRATEGY)
 
 start-server:
 	docker compose up -d server
@@ -16,11 +16,11 @@ start-server:
 
 start-a:
 	docker compose up -d --build strategy_a
-	docker compose logs -f
+	docker compose logs -f strategy_a
 
 start-b:
 	docker compose up -d --build strategy_b
-	docker compose logs -f
+	docker compose logs -f strategy_b
 
 start-bb:
 	docker compose up -d --build bollinger_bands_strategy
