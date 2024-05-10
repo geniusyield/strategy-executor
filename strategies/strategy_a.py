@@ -180,6 +180,7 @@ class strategy_a:
                 )
                 logger.info(f" > [OK] PLACED NEW ORDER")
                 logger.info(f"order_ref: {response.order_ref}")
+                logger.info(f"nft_token: {response.nft_token}")
                 self.last_order_ref = response.order_ref
             except:
                 logger.exception(f" > [FAILED] could not place order. ❌")
