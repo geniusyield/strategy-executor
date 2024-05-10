@@ -248,6 +248,7 @@ components:
       properties:
         offer_amount: { type: string }
         output_reference: { type: string }
+        nft_token: { type: string }
         owner_address: { type: string }
         owner_key_hash: { type: string }
         price: { type: string }
