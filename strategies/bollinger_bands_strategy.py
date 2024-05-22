@@ -75,13 +75,7 @@ class bollinger_bands_strategy:
             logger.exception(f" > Exception! ")
 
     def place_sell_order(self, api_client, logger, price):
-        logger.info("Placing SELL order...")
-
-        self.cancel_buy_orders()
-
-        if len(self.get_sell_orders()) > 0:
-            logger.info("Already placed SELL order. Nothing to do.")
-            return
+        logger.info(" ⚙️ Placing SELL order...")
 
         try:
             balance_available = int(api_client.get_balances().get(self.target_asset, 0))
