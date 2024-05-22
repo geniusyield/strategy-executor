@@ -95,7 +95,6 @@ class bollinger_bands_strategy:
               price_amount=f"{int(math.floor(order_size * price))}"
             )
             logger.info(f" > [OK] PLACED NEW SELL ORDER: {response.order_ref}")
-            self.sell_order_ref = response.order_ref
         except:
             logger.error(f" > ⚠️ [FAILED] Could not place SELL order. ⚠️")
             logger.exception(f" > Exception! ")
