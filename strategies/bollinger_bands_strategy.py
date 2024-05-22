@@ -1,6 +1,6 @@
 from datetime import datetime
 import math
-from api import Api
+from api import Api, ApiException
 import time
 
 from talipp.indicators import BB
@@ -22,8 +22,6 @@ class bollinger_bands_strategy:
         logger.info("========================================================================")
 
         # Internal state:
-        self.start_time = datetime.now()
-        self.counter = 0
         self.last_execution_time = None
         self._values = (None, None)
         self.api_client : Api = api_client
@@ -52,9 +50,7 @@ class bollinger_bands_strategy:
     def place_buy_order(self, api_client, logger, price):
         logger.info(" ⚙️ Placing BUY order...")
 
-        logger.info(" > Cancel all SELL orders...")
         self.cancel_sell_orders()
-        logger.info(" > [OK] Canceled all SELL orders.")
 
         try:
             balance_available = int(api_client.get_balances().get(self.base_asset, 0))
@@ -83,9 +79,7 @@ class bollinger_bands_strategy:
     def place_sell_order(self, api_client, logger, price):
         logger.info("Placing SELL order...")
 
-        logger.info(" > Cancel all BUY orders...")
         self.cancel_buy_orders()
-        logger.info(" > [OK] Canceled all BUY orders.")
 
         try:
             balance_available = int(api_client.get_balances().get(self.target_asset, 0))
@@ -111,10 +105,14 @@ class bollinger_bands_strategy:
             logger.exception(f" > Exception! ")
 
     def cancel_buy_orders(self):
+        self.logger.info(" > Cancel all BUY orders...")
         self.cancel_orders("bid")
+        self.logger.info(" > [OK] Canceled all BUY orders.")
 
     def cancel_sell_orders(self):
+        self.logger.info(" > Cancel all SELL orders...")
         self.cancel_orders("ask")
+        self.logger.info(" > [OK] Canceled all SELL orders.")
 
     def cancel_orders(self, side):
 
@@ -136,13 +134,15 @@ class bollinger_bands_strategy:
                 self.logger.info(f" ⚙️ Canceling order: {order.output_reference}")
                 self.api_client.cancel_order(order.output_reference)
                 self.logger.info(f" > [OK] Canceled order: {order.output_reference}")
-            except:
+            except ApiException:
                 self.logger.error(f" > ⚠️ [FAILED] could not cancel order: {order.output_reference} ⚠️")
                 self.logger.exception(f" > Exception! ")
 
     def process_candle(self, candle):
-        self.logger.info(f"--------------------------------------------------------------------------------")
-        self.logger.info(f" > processsing candle - timestamp: {candle.timestamp} - base_close: {candle.base_close}")
+        if self.initialized:
+            self.logger.info(f" > processsing candle - timestamp: {candle.timestamp} - base_close: {candle.base_close}")
+        else:
+            self.logger.info(f" > processsing init candle - timestamp: {candle.timestamp} - base_close: {candle.base_close}")
 
         if (not self.last_candle == None) and (self.last_candle.timestamp == candle.timestamp):
             self.logger.info(f" > Candle has already been processsed. Nothing to do.")
@@ -157,15 +157,13 @@ class bollinger_bands_strategy:
         # Keep a small window of values to check if there is a crossover.
         self._values = (self._values[-1], value)
 
-        self.logger.debug(f" > self.bb.input_values: {self.bb.input_values}")
-
         if len(self.bb) < 2 or self.bb[-1] == None or self.bb[-2] == None:
-           self.logger.info(f" Bollinger Bands: Initializing...  ⚙️ ⏳ ")
+           self.logger.info(f" BOLLINGER BANDS: Initializing...  ⚙️ ⏳ ")
            self.logger.info(f" > Upper band: Not available.")
            self.logger.info(f" > Lower band: Not available.")
            return
 
-        self.logger.info(f" Bollinger Bands: ")
+        self.logger.info(f" BOLLINGER BANDS: ")
         self.logger.info(f" > Upper band: {self.bb[-1].ub}")
         self.logger.info(f" > Lower band: {self.bb[-1].lb}")
 
@@ -187,27 +185,30 @@ class bollinger_bands_strategy:
     def log_orders(self):
         own_orders = self.api_client.get_own_orders(self.market)
 
-        self.logger.info(" Orders:")
+        self.logger.info(" ON-CHAIN ORDERS:")
 
         if (len(own_orders.asks) + len(own_orders.bids)) == 0:
             self.logger.info(f" > No orders.")
             return
 
         for sell_order in own_orders.asks:
-            self.logger.info(f" > SELL: {sell_order.output_reference} ")
+            self.logger.info(f" > SELL: {sell_order.output_reference}")
 
-        for sell_order in own_orders.bids:
-            self.logger.info(f" > BUY: {sell_order.output_reference} ")
+        for buy_order in own_orders.bids:
+            self.logger.info(f" > BUY: {buy_order.output_reference} ")
 
     def execute(self, api_client : Api, CONFIG, logger):
         current_time = datetime.now()
 
         if self.last_execution_time is None:
-            logger.info("Executing for the first time")
+            logger.info("Executing for the first time -> initialize.")
             candles = api_client.get_price_history(self.market, resolution="1m", sort="asc", limit=self.period*5)
             for candle in candles[:-1]:
+                self.logger.info(f"--------------------------------------------------------------------------------")
                 self.process_candle(candle)
                 time.sleep(1)
+            logger.info(" > [OK] Initialized.")
+            logger.info("========================================================================")
             self.initialized = True
             self.last_candle=None
         else:
@@ -218,16 +219,10 @@ class bollinger_bands_strategy:
         self.last_execution_time = current_time  # Update last execution time
         self.initialized = True
 
-        self.counter += 1
-        logger.info(f" > Counter: {self.counter}")
-
         try:
             get_market_price = api_client.get_market_price(self.market)
             candle=get_market_price[0]
-            logger.info(f" > Base closing price: {candle.base_close}")
             self.process_candle(candle)
         except:
             logger.error(f" > ⚠️ [FAILED] could not process candle ⚠️")
             logger.exception(f" > Exception! ")
-
-        logger.info(f" > EXECUTION FINISHED.")
