@@ -50,8 +50,6 @@ class bollinger_bands_strategy:
     def place_buy_order(self, api_client, logger, price):
         logger.info(" ⚙️ Placing BUY order...")
 
-        self.cancel_sell_orders()
-
         try:
             balance_available = int(api_client.get_balances().get(self.base_asset, 0))
             logger.debug(f" > balance_available : {balance_available}")
@@ -81,6 +79,10 @@ class bollinger_bands_strategy:
 
         self.cancel_buy_orders()
 
+        if len(self.get_sell_orders()) > 0:
+            logger.info("Already placed SELL order. Nothing to do.")
+            return
+
         try:
             balance_available = int(api_client.get_balances().get(self.target_asset, 0))
             logger.info(f" > balance_available : {balance_available}")
@@ -104,6 +106,14 @@ class bollinger_bands_strategy:
             logger.error(f" > ⚠️ [FAILED] Could not place SELL order. ⚠️")
             logger.exception(f" > Exception! ")
 
+    def get_buy_orders(self):
+        own_orders = self.api_client.get_own_orders(self.market)
+        return own_orders.bids
+
+    def get_sell_orders(self):
+        own_orders = self.api_client.get_own_orders(self.market)
+        return own_orders.asks
+
     def cancel_buy_orders(self):
         self.logger.info(" > Cancel all BUY orders...")
         self.cancel_orders("bid")
@@ -115,7 +125,6 @@ class bollinger_bands_strategy:
         self.logger.info(" > [OK] Canceled all SELL orders.")
 
     def cancel_orders(self, side):
-
         while True:
             orders = []
             own_orders = self.api_client.get_own_orders(self.market)
@@ -171,14 +180,24 @@ class bollinger_bands_strategy:
             self.logger.info(f" -> Initializaion phase. Do not place orders yet.")
             return
 
+        self.place_buy_order(self.api_client, self.logger, candle.base_close)
+
         # Price moved below lower band ?
         if self._values[-2] >= self.bb[-2].lb and self._values[-1] < self.bb[-1].lb:
             self.logger.info(f" -> Price moved below the lower band -> BUY!  🛒 🛒 🛒 ")
-            self.place_buy_order(self.api_client, self.logger, candle.base_close)
+            self.cancel_sell_orders()
+            if len(self.get_buy_orders()) > 0:
+                self.logger.info(" > Already placed BUY order. Nothing to do.")
+            else:
+                self.place_buy_order(self.api_client, self.logger, candle.base_close)
         # Price moved above upper band ?
         elif self._values[-2] <= self.bb[-2].ub and self._values[-1] > self.bb[-1].ub:
             self.logger.info(f" -> Price moved above the upper band -> SELL!  💲 💲 💲 ")
-            self.place_sell_order(self.api_client, self.logger, candle.base_close)
+            self.cancel_buy_orders()
+            if len(self.get_sell_orders()) > 0:
+                self.logger.info(" > Already placed SELL order. Nothing to do.")
+            else:
+                self.place_sell_order(self.api_client, self.logger, candle.base_low)
 
         self.log_orders()
 
