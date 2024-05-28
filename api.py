@@ -8,7 +8,7 @@ from client.api.balances import get_balances_address
 from client.api.assets import get_assets_id
 from client.api.orders import post_orders
 from client.api.orders import delete_orders
-from client.api.orders import post_order_fill
+from client.api.orders import post_orders_fill
 from client.api.orders import get_order_books_market_id
 from client.api.historical_prices import get_historical_prices_maestro_market_dex
 import time
@@ -104,12 +104,19 @@ class Api:
           return cast(DeleteOrderResponse, self.process_response(response))
 
     def direct_fill(self, *fills: FillRequest):
-        self.logger.info(f"[DIRECT-FILL] Placing order...")
+
+        self.logger.info(f"[DIRECT-FILL] Direct filling from on-chain orders...")
+
+        # Verify that the we do not try to fill from too many on-chain orders:
+        if len(fills) > 5:
+            self.logger.error("[DIRECT-FILL] Cannot fill from more than 5 on-chain orders.")
+            raise ValueError("[DIRECT-FILL] Cannot fill from more than 5 on-chain orders.")
 
         # Verify FillRequest instances:
-        for fill in fills:
+        for index, fill in enumerate(fills):
             if isinstance(fill, FillRequest):
-                self.logger.info(f"[DIRECT-FILL] Order Reference: {fill.order_ref}, Amount: {fill.amount}")
+                self.logger.info(f"[DIRECT-FILL] #{index+1} ref:    {fill.order_ref} ")
+                self.logger.info(f"[DIRECT-FILL] #{index+1} amount: {fill.amount} ")
             else:
                 self.logger.error("[DIRECT-FILL] Each fill must be an instance of Fill.")
                 raise TypeError("[DIRECT-FILL] Each fill must be an instance of Fill.")
@@ -120,9 +127,16 @@ class Api:
         for fill in fills:
             body.order_references_with_amount.append([fill.order_ref, fill.amount])
 
+        self.logger.info(f"[DIRECT-FILL] POST BODY: {body}")
         # Send the request:
-        response : Response[ErrorResponse | PostOrderFillResponse] = post_order_fill.sync_detailed(client=self.client, body=body)
-        self.logger.info(f"[DIRECT-FILL] Waiting {self.wait_for_confirmation} seconds for confirmation...")
-        time.sleep(self.wait_for_confirmation)
-        self.logger.info(f"[DIRECT-FILL] [OK] Done!")
+        response : Response[ErrorResponse | PostOrderFillResponse] = post_orders_fill.sync_detailed(client=self.client, body=body)
+
+        if isinstance(response.parsed, PostOrderFillResponse):
+            self.logger.info(f"[DIRECT-FILL] [OK] SUCCESS. transaction_id: {response.parsed.transaction_id}")
+            self.logger.info(f"[DIRECT-FILL] Waiting {self.wait_for_confirmation} seconds for confirmation...")
+            time.sleep(self.wait_for_confirmation)
+
+        if isinstance(response.parsed, PostOrderFillResponse):
+            self.logger.info(f"[DIRECT-FILL] [FAILED] {response.parsed.errorCode} {response.parsed.message}")
+
         return cast(PostOrderFillResponse, self.process_response(response))
