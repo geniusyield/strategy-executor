@@ -31,19 +31,14 @@ components:
     ErrorResponse:
       type: object
       properties:
-        error:
-          type: object
-          properties:
-            errorCode:
-              type: integer
-              minimum: 0
-              maximum: 9999
-              format: int32
-              description: Numeric error code indicating the type of error.
-            message:
-              type: string
-              description: Unique identifier of the indicent instance (used for troubleshooting).
+        errorCode:
+          type: string
+          examples: ["MULTI_FILL_NOT_SAME_PAIR"]
+        message:
+          type: string
+          examples: ["Given orders are not having same payment token"]
       required: [code, message]
+      examples: [{"errorCode": "MULTI_FILL_NOT_SAME_PAIR", "message": "Given orders are not having same payment token"}]
     Settings:
       type: object
       properties: {

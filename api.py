@@ -86,9 +86,16 @@ class Api:
         body.price_token = price_token
         body.price_amount = price_amount
         response : Response[ErrorResponse | PostOrderResponse] = post_orders.sync_detailed(client=self.client, body=body)
-        self.logger.info(f"[PLACE-ORDER] Waiting {self.wait_for_confirmation} seconds for confirmation...")
-        time.sleep(self.wait_for_confirmation)
-        self.logger.info(f"[PLACE-ORDER] [OK] Done!")
+
+        if isinstance(response.parsed, PostOrderResponse):
+            self.logger.info(f"[PLACE-ORDER] Placed order: {response.parsed.transaction_id}")
+            self.logger.info(f"[PLACE-ORDER] Waiting {self.wait_for_confirmation} seconds for confirmation...")
+            time.sleep(self.wait_for_confirmation)
+            self.logger.info(f"[PLACE-ORDER] [OK] Done!")
+
+        if isinstance(response.parsed, ErrorResponse):
+            self.logger.info(f"[PLACE-ORDER] [FAILED] ⚠️ [{response.parsed.error_code}] {response.parsed.message}")
+
         return cast(PostOrderResponse, self.process_response(response))
 
     def cancel_order(self, order_reference : str):
@@ -98,9 +105,16 @@ class Api:
           body.address=self.own_address
           body.order_references=[order_reference]
           response: Response[ErrorResponse | DeleteOrderResponse] = delete_orders.sync_detailed(client=self.client, body=body)
-          self.logger.info(f"[CANCEL-ORDER] Waiting {self.wait_for_confirmation} seconds for confirmation...")
-          time.sleep(self.wait_for_confirmation)
-          self.logger.info(f"[CANCEL-ORDER] [OK] Done!")
+
+          if isinstance(response.parsed, DeleteOrderResponse):
+            self.logger.info(f"[CANCEL-ORDER] [OK] Canceled: {response.parsed.transaction_id}")
+            self.logger.info(f"[CANCEL-ORDER] Waiting {self.wait_for_confirmation} seconds for confirmation...")
+            time.sleep(self.wait_for_confirmation)
+            self.logger.info(f"[CANCEL-ORDER] [OK] Done!")
+
+          if isinstance(response.parsed, ErrorResponse):
+            self.logger.info(f"[CANCEL-ORDER] [FAILED] ⚠️ [{response.parsed.error_code}] {response.parsed.message}")
+
           return cast(DeleteOrderResponse, self.process_response(response))
 
     def direct_fill(self, *fills: FillRequest):
@@ -127,7 +141,6 @@ class Api:
         for fill in fills:
             body.order_references_with_amount.append([fill.order_ref, fill.amount])
 
-        self.logger.info(f"[DIRECT-FILL] POST BODY: {body}")
         # Send the request:
         response : Response[ErrorResponse | PostOrderFillResponse] = post_orders_fill.sync_detailed(client=self.client, body=body)
 
@@ -136,7 +149,7 @@ class Api:
             self.logger.info(f"[DIRECT-FILL] Waiting {self.wait_for_confirmation} seconds for confirmation...")
             time.sleep(self.wait_for_confirmation)
 
-        if isinstance(response.parsed, PostOrderFillResponse):
-            self.logger.info(f"[DIRECT-FILL] [FAILED] {response.parsed.errorCode} {response.parsed.message}")
+        if isinstance(response.parsed, ErrorResponse):
+            self.logger.info(f"[DIRECT-FILL] [FAILED] ⚠️ [{response.parsed.error_code}] {response.parsed.message}")
 
         return cast(PostOrderFillResponse, self.process_response(response))
