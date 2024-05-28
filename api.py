@@ -8,6 +8,7 @@ from client.api.balances import get_balances_address
 from client.api.assets import get_assets_id
 from client.api.orders import post_orders
 from client.api.orders import delete_orders
+from client.api.orders import post_order_fill
 from client.api.orders import get_order_books_market_id
 from client.api.historical_prices import get_historical_prices_maestro_market_dex
 import time
@@ -17,6 +18,11 @@ class ApiException(Exception):
         self.status_code = status_code
         self.response = response
         super().__init__(f"API request failed with status {status_code}: {response}")
+
+class FillRequest:
+    def __init__(self, order_ref: str, amount: str) -> None:
+        self.order_ref = order_ref
+        self.amount = amount
 
 class Api:
 
@@ -96,3 +102,27 @@ class Api:
           time.sleep(self.wait_for_confirmation)
           self.logger.info(f"[CANCEL-ORDER] [OK] Done!")
           return cast(DeleteOrderResponse, self.process_response(response))
+
+    def direct_fill(self, *fills: FillRequest):
+        self.logger.info(f"[DIRECT-FILL] Placing order...")
+
+        # Verify FillRequest instances:
+        for fill in fills:
+            if isinstance(fill, FillRequest):
+                self.logger.info(f"[DIRECT-FILL] Order Reference: {fill.order_ref}, Amount: {fill.amount}")
+            else:
+                self.logger.error("[DIRECT-FILL] Each fill must be an instance of Fill.")
+                raise TypeError("[DIRECT-FILL] Each fill must be an instance of Fill.")
+
+        # Build the request body:
+        body = PostOrderFillParameters()
+        body.order_references_with_amount = []
+        for fill in fills:
+            body.order_references_with_amount.append([fill.order_ref, fill.amount])
+
+        # Send the request:
+        response : Response[ErrorResponse | PostOrderFillResponse] = post_order_fill.sync_detailed(client=self.client, body=body)
+        self.logger.info(f"[DIRECT-FILL] Waiting {self.wait_for_confirmation} seconds for confirmation...")
+        time.sleep(self.wait_for_confirmation)
+        self.logger.info(f"[DIRECT-FILL] [OK] Done!")
+        return cast(PostOrderFillResponse, self.process_response(response))
