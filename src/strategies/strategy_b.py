@@ -1,13 +1,15 @@
 from datetime import datetime
 
+
+# pylint: disable=invalid-name
 class strategy_b:
-    def __init__(self, client, CONFIG, logger):
+    def __init__(self, client, config, logger):
         self.first_execution_time = None
         self.client = client
-        self.CONFIG = CONFIG
+        self.config = config
         self.logger = logger
         logger.info("Strategy B instance created")
-        
+
         logger.info("========================================================================")
         logger.info("                                                                        ")
         logger.info("                      ⚠️     WARNING!    ⚠️                            ")
@@ -20,7 +22,8 @@ class strategy_b:
         logger.info("                                                                        ")
         logger.info("========================================================================")
 
-    def execute(self, client, CONFIG, logger):
+    # pylint: disable=unused-argument
+    def execute(self, client, config, logger):
         current_time = datetime.now()
         if self.first_execution_time is None:
             self.first_execution_time = current_time

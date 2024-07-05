@@ -1,21 +1,21 @@
-from client import AuthenticatedClient
-from client.models import ErrorResponse, Settings
-from client.api.settings import get_settings
-from client.types import Response
-from typing import cast, Union
-from flask import Flask, jsonify
-import threading
-import time
+import importlib
+import logging
 import os
 import sys
-import importlib
-import yaml
+import threading
 import time
-from api import Api
-from api import ApiException
 from datetime import datetime
-import logging
+from typing import Union, cast
+
+import yaml
+from client import AuthenticatedClient
+from client.api.settings import get_settings
+from client.models import ErrorResponse, Settings
+from client.types import Response
+from flask import Flask, jsonify
 from flask_wtf.csrf import CSRFProtect
+
+from api import Api, ApiException
 
 # Spin up Flask Application
 app = Flask(__name__)
@@ -48,7 +48,7 @@ def health_check():
     return jsonify(status='healthy', message='Service is up and running!')
 
 def load_strategy(strategy_class):
-    module = importlib.import_module(f".{strategy_class}", ".strategies")
+    module = importlib.import_module(f".{strategy_class}", ".src.strategies")
     if hasattr(module, 'init'):
         module.init()
     strategy_class_ref  = getattr(module, strategy_class)

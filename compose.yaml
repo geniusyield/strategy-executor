@@ -14,7 +14,7 @@ services:
         coreProvider:
           maestroToken: <<CORE_MAESTRO_API_KEY>>
           turboSubmit: false
-        networkId: "mainnet" # supported: mainnet ot preprod
+        networkId: "mainnet" # supported: mainnet or preprod
         logging:
           - type: {tag: stderr}
             severity: "Debug" # Options: Debug, Info, Warning or Error
@@ -59,6 +59,47 @@ services:
         setting_2: 567 ms
     depends_on:
       - server
+  strategy_c:
+    build:
+      context: .
+    environment:
+      BACKEND_URL: http://server:8082
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      EXECUTION_DELAY: 30 # Time period in seconds to wait between strategy exeuctions
+      STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
+      RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
+      CONFIRMATION_DELAY: 90
+      STRATEGY: strategy_c
+      CONFIG: |
+        ASSET_PAIR: "asset1266q2ewhgul7jh3xqpvjzqarrepfjuler20akr-asset1xdz4yj4ldwlpsz2yjgjtt9evg9uskm8jrzjwhj"
+        START_TIME: "2023-06-15T19:19:56.462Z"
+        END_TIME: "2024-06-15T19:19:56.462Z"
+        BIN_INTERVAL: "1d"
+    depends_on:
+      - server
+  fear_and_greed_index_strategy:
+    build:
+      context: .
+    environment:
+      BACKEND_URL: http://server:8082
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      EXECUTION_DELAY: 21600 # Time period in seconds to wait between strategy exeuctions (6 hours)
+      STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
+      RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
+      CONFIRMATION_DELAY: 90
+      STRATEGY: fear_and_greed_index_strategy
+      CONFIG: |
+        BASE_ASSET: lovelace
+        # GENS for MAINNET:
+        TARGET_ASSET: dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53
+        # tGENS for PRERPOD:
+        # TARGET_ASSET: c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53
+        POSITION_SIZE_LOVELACES: 1000000
+        STD_DEV_MULTIPLIER: 1.5
+        PERIOD: 5
+        FEAR_AND_GREED_INDEX_THRESHOLD: 60
+    depends_on:
+      - server
   bollinger_bands_strategy:
     build:
       context: .
@@ -79,5 +120,32 @@ services:
         POSITION_SIZE_LOVELACES: 1000000
         STD_DEV_MULTIPLIER: 1.5
         PERIOD: 5
+    depends_on:
+      - server
+  combined_rsi_bollinger_strategy:
+    build:
+      context: .
+    environment:
+      BACKEND_URL: http://server:8082
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      EXECUTION_DELAY: 3600 # Time period in seconds to wait between strategy exeuctions
+      STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
+      RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
+      CONFIRMATION_DELAY: 90
+      STRATEGY: combined_rsi_bollinger_strategy
+      CONFIG: |
+        BASE_ASSET: lovelace
+        # GENS for MAINNET:
+        TARGET_ASSET: dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53
+        # tGENS for PRERPOD:
+        # TARGET_ASSET: c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53
+        POSITION_SIZE_LOVELACES: 1000000
+        RSI_PERIOD: 10  # Shorter period for quicker signals
+        RSI_OVERBOUGHT: 65  # Lower threshold for overbought
+        RSI_OVERSOLD: 35  # Higher threshold for oversold
+        BB_PERIOD: 20  # Standard period
+        BB_STD_DEV: 1.8  # Tighter bands for volatility
+        USE_FEAR_AND_GREED: true
+        FEAR_AND_GREED_INDEX_THRESHOLD: 60
     depends_on:
       - server
