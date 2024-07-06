@@ -104,7 +104,5 @@ services:
         RSI_OVERSOLD: 35  # Higher threshold for oversold
         BB_PERIOD: 20  # Standard period
         BB_STD_DEV: 1.8  # Tighter bands for volatility
-        USE_FEAR_AND_GREED: true
-        FEAR_AND_GREED_INDEX_THRESHOLD: 60
     depends_on:
       - server
