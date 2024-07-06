@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from src.utils.logger_utils import LoggerUtils
+
 
 # pylint: disable=invalid-name
 class strategy_b:
@@ -9,18 +11,7 @@ class strategy_b:
         self.config = config
         self.logger = logger
         logger.info("Strategy B instance created")
-
-        logger.info("========================================================================")
-        logger.info("                                                                        ")
-        logger.info("                      ⚠️     WARNING!    ⚠️                            ")
-        logger.info("                                                                        ")
-        logger.info(" THIS IS ONLY A PROOF-OF-CONCEPT EXAMPLE STRATEGY IMPLEMENTATION.       ")
-        logger.info("                                                                        ")
-        logger.info(" IT IS ONLY INTENDED AS IMPLEMENTATION REFERENCE FOR TRADING STRATEGIES.")
-        logger.info("                                                                        ")
-        logger.info(" THIS IMPLEMENTATION IS NOT PRODUCTION-READY.                           ")
-        logger.info("                                                                        ")
-        logger.info("========================================================================")
+        LoggerUtils.log_warning(logger)
 
     # pylint: disable=unused-argument
     def execute(self, client, config, logger):

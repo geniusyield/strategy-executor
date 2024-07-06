@@ -15,11 +15,5 @@
     "talipp",
     "tgens"
   ],
-  "pylint.args": [
-    "--max-line-length=150",
-    "--disable=missing-module-docstring",
-    "--disable=missing-class-docstring",
-    "--disable=missing-function-docstring",
-    "--disable=too-many-instance-attributes"
-  ]
+  "pylint.args": ["--max-line-length=120", "--disable=missing-module-docstring"]
 }

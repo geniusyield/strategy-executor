@@ -1,6 +1,8 @@
 from api import Api
-from src.utils.candlestick_price_chart import CandlestickPriceChart
-from src.web_scrapers.genius_yield_api import GeniusYieldAPI
+from src.data_extraction.genius_yield_api_scraper import GeniusYieldAPIScraper
+from src.models.candlestick_price_chart import CandlestickPriceChart
+from src.utils.logger_utils import LoggerUtils
+from src.views.candlestick_price_chart_view import CandlestickPriceChartView
 
 
 # pylint: disable=invalid-name
@@ -9,18 +11,7 @@ class strategy_c:
     # pylint: disable=unused-argument
     def __init__(self, api_client, config, logger):
         logger.info(" > init: strategy_c instance created.")
-
-        logger.info("========================================================================")
-        logger.info("                                                                        ")
-        logger.info("                      ⚠️     WARNING!    ⚠️                            ")
-        logger.info("                                                                        ")
-        logger.info(" THIS IS ONLY A PROOF-OF-CONCEPT EXAMPLE STRATEGY IMPLEMENTATION.       ")
-        logger.info("                                                                        ")
-        logger.info(" IT IS ONLY INTENDED AS IMPLEMENTATION REFERENCE FOR TRADING STRATEGIES.")
-        logger.info("                                                                        ")
-        logger.info(" THIS IMPLEMENTATION IS NOT PRODUCTION-READY.                           ")
-        logger.info("                                                                        ")
-        logger.info("========================================================================")
+        LoggerUtils.log_warning(logger)
 
         # Internal state:
         self.first_execution_time = None
@@ -34,13 +25,14 @@ class strategy_c:
 
     # pylint: disable=unused-argument
     def execute(self, api_client : Api, config, logger):
-        api = GeniusYieldAPI(self.asset_pair, self.start_time, self.end_time, self.bin_interval)
+        api = GeniusYieldAPIScraper(self.asset_pair, self.start_time, self.end_time, self.bin_interval)
 
         data = api.fetch_data()
 
         if data:
             parsed_data = api.parse_data(data)
             candlestickPriceChart = CandlestickPriceChart(parsed_data)
-            candlestickPriceChart.plot()
+            view = CandlestickPriceChartView(candlestickPriceChart)
+            view.plot()
         else:
             self.logger.info("🤔")
