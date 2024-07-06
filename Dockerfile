@@ -11,6 +11,11 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    dos2unix \
+    --no-install-recommends
+
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
 ARG UID=10001
@@ -40,6 +45,7 @@ COPY .flaskenv .
 
 # Copy the bash scripts into the container.
 COPY *.sh .
+RUN dos2unix *.sh
 RUN chmod +x *.sh
 
 RUN /bin/bash -c /app/generate_client.sh
