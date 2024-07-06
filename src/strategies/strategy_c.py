@@ -32,7 +32,7 @@ class strategy_c:
         if data:
             parsed_data = api.parse_data(data)
             candlestickPriceChart = CandlestickPriceChart(parsed_data)
-            view = CandlestickPriceChartView(candlestickPriceChart)
+            view = CandlestickPriceChartView(candlestickPriceChart, self.logger)
             view.plot()
         else:
             self.logger.info("🤔")
