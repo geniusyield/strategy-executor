@@ -45,7 +45,9 @@ class FearAndGreedIndexWebScraper:
         self.logger: logging.Logger = logger
         self.index_value: Optional[str] = None
         self.web_driver_wait_timeout: int = web_driver_wait_timeout or self.WEB_DRIVER_WAIT_DEFAULT_TIMEOUT
+        self.logger.info("[FearAndGreedIndexWebScraper] Initializing WebDriver...")
         self.driver: webdriver.Chrome = self._init_driver()
+        self.logger.info("[FearAndGreedIndexWebScraper] WebDriver initialized.")
 
     def _init_driver(self) -> webdriver.Chrome:
         """
