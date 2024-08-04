@@ -62,6 +62,8 @@ COPY .flaskenv .
 COPY *.sh .
 RUN dos2unix *.sh
 RUN chmod +x *.sh
+
+# Generate API client code:
 RUN /bin/bash -c /app/generate_client.sh
 
 # Expose the port that the application listens on.

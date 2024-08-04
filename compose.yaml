@@ -149,3 +149,28 @@ services:
         FEAR_AND_GREED_INDEX_THRESHOLD: 60
     depends_on:
       - server
+  simple_rsi_bollinger_strategy:
+    build:
+      context: .
+    environment:
+      BACKEND_URL: http://server:8082
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      EXECUTION_DELAY: 60 # Time period in seconds to wait between strategy executions
+      STARTUP_DELAY: 1 # Time period in seconds to wait for the backend to start
+      RETRY_DELAY: 20 # Time period in seconds to wait before retrying to reach the backend
+      CONFIRMATION_DELAY: 90
+      STRATEGY: simple_rsi_bollinger_strategy
+      CONFIG: |
+        BASE_ASSET: lovelace
+        # GENS for MAINNET:
+        TARGET_ASSET: dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53
+        # tGENS for PRERPOD:
+        # TARGET_ASSET: c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53
+        POSITION_SIZE_LOVELACES: 1000000
+        RSI_PERIOD: 10  # Shorter period for quicker signals
+        RSI_OVERBOUGHT: 65  # Lower threshold for overbought
+        RSI_OVERSOLD: 35  # Higher threshold for oversold
+        BB_PERIOD: 20  # Standard period
+        BB_STD_DEV: 1.8  # Tighter bands for volatility
+    depends_on:
+      - server
