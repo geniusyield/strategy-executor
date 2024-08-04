@@ -155,7 +155,7 @@ class strategy_a:
             for candle in response:
                 logger.info(f" > Closing price: {candle.base_close}")
         except ApiException as e:
-            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")Stashed changes:strategies/strategy_a.py
+            logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
 
     def execute(self, api_client, config, logger):
         current_time = datetime.now()
