@@ -1,0 +1,19 @@
+{
+  "cSpell.words": [
+    "addstrategy",
+    "ALTCOINS",
+    "arange",
+    "backtrader",
+    "Bollinger",
+    "Cardano",
+    "cerebro",
+    "Doji",
+    "fgcior",
+    "fgis",
+    "Keltner",
+    "lovelaces",
+    "talipp",
+    "tgens"
+  ],
+  "pylint.args": ["--max-line-length=120", "--disable=missing-module-docstring"]
+}

@@ -14,6 +14,25 @@ WORKDIR /app
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     dos2unix \
+    wget \
+    unzip \
+    curl \
+    gnupg \
+    --no-install-recommends
+
+# Install Chrome
+RUN curl -fsSL https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && \
+    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt-get update && \
+    apt-get install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download ChromeDriver
+RUN CHROME_DRIVER_VERSION=`curl -sS chromedriver.storage.googleapis.com/LATEST_RELEASE` && \
+    wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip" && \
+    unzip /tmp/chromedriver.zip -d /usr/local/bin/ && \
+    rm /tmp/chromedriver.zip
+
     --no-install-recommends
 
 # Create a non-privileged user that the app will run under.
@@ -22,9 +41,7 @@ ARG UID=10001
 RUN adduser \
     --disabled-password \
     --gecos "" \
-    --home "/nonexistent" \
     --shell "/sbin/nologin" \
-    --no-create-home \
     --uid "${UID}" \
     appuser
 
@@ -38,7 +55,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Copy the source code into the container.
 COPY *.py .
-COPY strategies/* strategies/
+COPY src/ src/
 COPY bot-api.yaml .
 COPY requirements.txt .
 COPY .flaskenv .
@@ -47,7 +64,6 @@ COPY .flaskenv .
 COPY *.sh .
 RUN dos2unix *.sh
 RUN chmod +x *.sh
-
 RUN /bin/bash -c /app/generate_client.sh
 
 # Expose the port that the application listens on.

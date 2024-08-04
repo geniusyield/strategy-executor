@@ -22,6 +22,14 @@ start-b:
 	docker compose up -d --build strategy_b
 	docker compose logs -f strategy_b
 
+start-c:
+	docker compose up -d --build strategy_c
+	docker compose logs -f strategy_c
+
+start-fgis:
+	docker compose up -d --build fear_and_greed_index_strategy
+	docker compose logs -f fear_and_greed_index_strategy
+
 start-bb:
 	docker compose up -d --build bollinger_bands_strategy
 	docker compose logs -f bollinger_bands_strategy
