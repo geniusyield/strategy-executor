@@ -34,9 +34,17 @@ start-bb:
 	docker compose up -d --build bollinger_bands_strategy
 	docker compose logs -f bollinger_bands_strategy
 
+start-fng:
+	docker compose up -d --build fear_and_greed_index_strategy
+	docker compose logs -f fear_and_greed_index_strategy
+
 start-crbs:
 	docker compose up -d --build combined_rsi_bollinger_strategy
 	docker compose logs -f combined_rsi_bollinger_strategy
+
+start-srbs:
+	docker compose up -d --build simple_rsi_bollinger_strategy
+	docker compose logs -f simple_rsi_bollinger_strategy
 
 server-logs:
 	docker compose logs -f server
