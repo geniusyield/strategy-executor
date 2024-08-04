@@ -4,6 +4,7 @@ from datetime import datetime
 from api import ApiException
 from src.utils.logger_utils import LoggerUtils
 
+from api import ApiException, FillRequest
 
 def render_cardano_asset_name_with_policy(policy_asset_string):
     if 'lovelace' in policy_asset_string.lower():
@@ -118,6 +119,7 @@ class strategy_a:
         except ApiException as e:
             logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
 
+        gens_ada_market_id="lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53"
         logger.info("==============================================")
         logger.info("                 OWN ORDERS                   ")
         logger.info("==============================================")
@@ -130,9 +132,15 @@ class strategy_a:
 
             for order in response.asks:
                 logger.info(f" > ask > Amount: {order.offer_amount}, Price: {order.price}")
+                return
 
             for order in response.bids:
                 logger.info(f" > bid > Amount: {order.offer_amount}, Price: {order.price}")
+
+                logger.info(f"  ==================== CALLING DIRECT FILL =====================")
+                api_client.direct_fill(FillRequest(order.output_reference, "1"))
+
+                logger.info(f"  ==================== DIRECT FILL DONE =====================")
         except ApiException as e:
             logger.exception(f"ApiException: HTTP {e.status_code}: {e.response}")
 
