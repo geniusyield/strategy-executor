@@ -56,6 +56,9 @@ get-fees:
 get-markets:
 	curl -H "api-key: $(SERVER_API_KEY)" localhost:8082/v0/markets && echo
 
+get-balances:
+	curl -H "api-key: $(SERVER_API_KEY)" localhost:8082/v0/balances && echo
+
 get-order-book:
 	curl -H "api-key: $(SERVER_API_KEY)" localhost:8082/v0/order-books/lovelace_c6e65ba7878b2f8ea0ad39287d3e2fd256dc5c4160fc19bdf4c4d87e.7447454e53 && echo
 
