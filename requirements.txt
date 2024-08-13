@@ -7,3 +7,4 @@ openapi-python-client==0.19.1
 selenium==4.21.0
 talipp==2.2.0
 webdriver-manager==4.0.2
+polars==0.20.25
