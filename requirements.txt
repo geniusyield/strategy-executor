@@ -2,7 +2,7 @@ backtrader==1.9.78.123
 beautifulsoup4==4.12.3
 flask==3.0
 Flask-WTF==1.2.1
-gunicorn==22.0.0
+gunicorn==23.0.0
 openapi-python-client==0.19.1
 selenium==4.21.0
 talipp==2.2.0
