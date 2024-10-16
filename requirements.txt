@@ -8,3 +8,4 @@ selenium==4.21.0
 talipp==2.2.0
 webdriver-manager==4.0.2
 polars==0.20.25
+openai==1.51.2

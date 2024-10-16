@@ -202,3 +202,23 @@ services:
         STD: 0.02
     depends_on:
       - server
+  open_ai_strategy:
+    build:
+      context: .
+    environment:
+      BACKEND_URL: http://server:8082
+      SERVER_API_KEY: ${SERVER_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      EXECUTION_DELAY: 21600 # Run the strategy every 6 hours.
+      STARTUP_DELAY: 120 # Wait 2 minutes for the backend to start
+      RETRY_DELAY: 60 # Wait 1 minutes for the backend to become available in case not yet running.
+      CONFIRMATION_DELAY: 90 # Wait 1.5 minutes for on-chain confirmations.
+      STRATEGY: open_ai_strategy
+      CONFIG: |
+        # GENS-ADA pair:
+        BASE_ASSET: lovelace
+        TARGET_ASSET: dda5fdb1002f7389b33e036b6afee82a8189becb6cba852e8b79b4fb.0014df1047454e53
+        # Position size: 100 ADA
+        POSITION_SIZE_LOVELACES: 100000000
+    depends_on:
+      - server

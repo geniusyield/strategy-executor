@@ -46,6 +46,10 @@ start-srbs:
 	docker compose up -d --build simple_rsi_bollinger_strategy
 	docker compose logs -f simple_rsi_bollinger_strategy
 
+start-open-ai:
+	docker compose up -d --build open_ai_strategy
+	docker compose logs -f open_ai_strategy
+
 server-logs:
 	docker compose logs -f server
 
